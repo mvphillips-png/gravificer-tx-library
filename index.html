@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GF-TX-000 — The Signal Standard // Gravificer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #04060a;
+  --bg2:       #07080f;
+  --bg3:       #0a0c16;
+  --cyan:      #00fff7;
+  --magenta:   #ff003c;
+  --amber:     #ffe600;
+  --green:     #39ff14;
+  --violet:    #9b6dff;
+  --pink:      #ff4daa;
+  --text:      #d0d8f0;
+  --text-dim:  #6070a0;
+  --text-muted:#35405a;
+  --border:          rgba(155,109,255,0.15);
+  --border-hot:      rgba(155,109,255,0.4);
+  --border-cyan:     rgba(0,255,247,0.2);
+  --glow-cyan:   0 0 28px rgba(0,255,247,0.3);
+  --glow-violet: 0 0 40px rgba(155,109,255,0.35);
+  --glow-pink:   0 0 28px rgba(255,77,170,0.3);
+  /* Gradient stops from reference */
+  --grad-a: #1a0a2e;
+  --grad-b: #2d1060;
+  --grad-c: #1a0630;
+  --grad-btn: linear-gradient(90deg, #9b6dff, #ff4daa);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 400;
+  line-height: 1.75;
+  cursor: crosshair;
+  overflow-x: hidden;
+}
+
+::selection { background: rgba(155,109,255,0.3); color: #e8d8ff; }
+
+/* ── ATMOSPHERE — deep purple gradient behind everything ── */
+.atmo {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 10%, rgba(80,20,140,0.45) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(120,20,80,0.3) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(40,10,80,0.2) 0%, transparent 100%);
+}
+
+/* ── GRID overlay ── */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(155,109,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(155,109,255,0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ── SCANLINES ── */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+  );
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ── TOP PROGRESS BAR ── */
+.top-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(155,109,255,0.15);
+  z-index: 200;
+}
+.top-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+  width: 0%;
+  transition: width .1s;
+  box-shadow: 0 0 10px rgba(155,109,255,0.6);
+}
+
+/* ── SIDE NAV DOTS ── */
+.progress-nav {
+  position: fixed;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  z-index: 100;
+}
+.progress-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.progress-dot.active {
+  background: var(--violet);
+  box-shadow: 0 0 8px var(--violet);
+  height: 14px;
+  border-radius: 2px;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative;
+  padding: 5.5rem 0 4.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.corner-tl, .corner-br {
+  position: absolute;
+  width: 24px; height: 24px;
+}
+.corner-tl {
+  top: 1.5rem; left: 0;
+  border-top: 1px solid var(--violet);
+  border-left: 1px solid var(--violet);
+  opacity: .7;
+}
+.corner-br {
+  bottom: -1px; right: 0;
+  border-bottom: 1px solid var(--violet);
+  border-right: 1px solid var(--violet);
+  opacity: .7;
+}
+
+.header-signal {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--violet);
+  letter-spacing: .2em;
+  margin-bottom: 2rem;
+  opacity: .7;
+}
+.header-signal span { animation: blink 1.4s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.wordmark {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: .5rem;
+  position: relative;
+  display: inline-block;
+  /* Gradient text */
+  background: linear-gradient(135deg, #c4aaff 0%, #ff80c8 55%, #00fff7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(155,109,255,0.5));
+}
+
+.wordmark-ghost {
+  position: absolute;
+  top: 0; left: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: .5px rgba(155,109,255,0.2);
+  animation: ghostShift 6s ease-in-out infinite;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes ghostShift {
+  0%,100%{transform:translate(0,0);opacity:.5}
+  25%{transform:translate(3px,-1px);opacity:.3}
+  50%{transform:translate(-2px,1px);opacity:.6}
+  75%{transform:translate(1px,2px);opacity:.2}
+}
+
+.header-subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: .1em;
+  margin-bottom: 2.5rem;
+  margin-top: .75rem;
+}
+
+.header-deck {
+  font-size: 1.15rem;
+  font-weight: 300;
+  color: var(--text);
+  max-width: 520px;
+  line-height: 1.8;
+  letter-spacing: .01em;
+}
+
+/* ── SECTIONS ── */
+.section {
+  padding: 4rem 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.section.revealed { opacity: 1; transform: translateY(0); }
+
+.section-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.section-index {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: .15em;
+  white-space: nowrap;
+}
+.section-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+
+.pillar-tag {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border: 1px solid;
+  position: relative;
+}
+.pillar-tag.art    { color: #c4aaff; border-color: rgba(196,170,255,0.4); text-shadow: 0 0 12px rgba(196,170,255,0.5); }
+.pillar-tag.energy { color: var(--amber); border-color: rgba(255,230,0,0.35); text-shadow: 0 0 12px rgba(255,230,0,0.4); }
+.pillar-tag.know   { color: var(--green); border-color: rgba(57,255,20,0.3); text-shadow: 0 0 12px rgba(57,255,20,0.35); }
+.pillar-tag.pat    { color: var(--pink); border-color: rgba(255,77,170,0.4); text-shadow: 0 0 12px rgba(255,77,170,0.4); }
+
+.section-headline {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 1.75rem;
+  letter-spacing: .02em;
+  color: #e8e0ff;
+  text-shadow: 0 0 30px rgba(155,109,255,0.2);
+}
+
+.section-body {
+  font-size: .975rem;
+  color: var(--text);
+  line-height: 1.88;
+  max-width: 640px;
+  letter-spacing: .01em;
+}
+.section-body p { margin-bottom: 1.1rem; }
+.section-body p:last-child { margin-bottom: 0; }
+
+/* ── PULLQUOTE — glass panel ── */
+.pullquote {
+  position: relative;
+  padding: 1.5rem 1.75rem;
+  margin: 2rem 0;
+  border-left: 2px solid;
+  background: rgba(155,109,255,0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(155,109,255,0.2);
+  border-left: 2px solid var(--violet);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #e0d4ff;
+  line-height: 1.65;
+}
+.pullquote.amber  { border-left-color: var(--amber); border-color: rgba(255,230,0,0.15); background: rgba(255,230,0,0.04); color: #f8f0c8; }
+.pullquote.green  { border-left-color: var(--green); border-color: rgba(57,255,20,0.12); background: rgba(57,255,20,0.03); color: #d4f8d0; }
+.pullquote.pink   { border-left-color: var(--pink); border-color: rgba(255,77,170,0.15); background: rgba(255,77,170,0.04); color: #ffd4ea; }
+
+/* ── AXIOM — glass mono block ── */
+.axiom {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  padding: 1.1rem 1.4rem;
+  margin: 1.75rem 0;
+  border: 1px solid;
+  position: relative;
+  letter-spacing: .05em;
+  line-height: 1.65;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.axiom::before {
+  content: '//';
+  position: absolute;
+  top: -.65rem; left: 1rem;
+  background: var(--bg);
+  padding: 0 .5rem;
+  font-size: 11px;
+  opacity: .45;
+}
+.axiom.violet  { color: #c4aaff; border-color: rgba(196,170,255,0.25); background: rgba(155,109,255,0.05); box-shadow: inset 0 0 20px rgba(155,109,255,0.06); }
+.axiom.amber   { color: var(--amber); border-color: rgba(255,230,0,0.22); background: rgba(255,230,0,0.03); }
+.axiom.green   { color: var(--green); border-color: rgba(57,255,20,0.18); background: rgba(57,255,20,0.025); }
+.axiom.pink    { color: var(--pink); border-color: rgba(255,77,170,0.25); background: rgba(255,77,170,0.04); }
+
+/* ── NOTE BLOCK — glass card ── */
+.note-block {
+  background: rgba(155,109,255,0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(155,109,255,0.12);
+  border-top: 2px solid;
+  padding: 1.1rem 1.4rem;
+  margin: 1.75rem 0;
+}
+.note-block.art    { border-top-color: rgba(196,170,255,0.7); border-color: rgba(196,170,255,0.12); background: rgba(155,109,255,0.05); }
+.note-block.energy { border-top-color: rgba(255,230,0,0.55); border-color: rgba(255,230,0,0.1); background: rgba(255,230,0,0.03); }
+.note-block.know   { border-top-color: rgba(57,255,20,0.45); border-color: rgba(57,255,20,0.08); background: rgba(57,255,20,0.025); }
+.note-block.pat    { border-top-color: rgba(255,77,170,0.6); border-color: rgba(255,77,170,0.12); background: rgba(255,77,170,0.04); }
+
+.note-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin-bottom: .6rem;
+}
+.note-block.art    .note-label { color: #c4aaff; }
+.note-block.energy .note-label { color: var(--amber); }
+.note-block.know   .note-label { color: var(--green); }
+.note-block.pat    .note-label { color: var(--pink); }
+.note-text { font-size: .9rem; color: var(--text-dim); line-height: 1.72; }
+
+/* ── DEMO FRAME — glass card ── */
+.demo-frame {
+  border: 1px solid rgba(155,109,255,0.3);
+  margin: 2rem 0;
+  position: relative;
+  background: rgba(10,8,22,0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 40px rgba(155,109,255,0.1), inset 0 0 40px rgba(155,109,255,0.03);
+}
+.demo-frame::before {
+  content: 'LIVE DEMONSTRATION';
+  position: absolute;
+  top: -9px; left: 1.5rem;
+  background: var(--bg);
+  padding: 0 .75rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--violet);
+  letter-spacing: .2em;
+  text-shadow: 0 0 8px rgba(155,109,255,0.6);
+}
+
+.demo-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(155,109,255,0.15);
+}
+.demo-tab {
+  flex: 1;
+  padding: .85rem 1.25rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  cursor: crosshair;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+}
+.demo-tab:hover { color: var(--text-dim); }
+.demo-tab.active {
+  color: var(--violet);
+  border-bottom-color: var(--violet);
+  background: rgba(155,109,255,0.05);
+  text-shadow: 0 0 10px rgba(155,109,255,0.5);
+}
+.demo-tab.after-tab.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+  background: rgba(57,255,20,0.03);
+  text-shadow: 0 0 10px rgba(57,255,20,0.4);
+}
+
+.demo-body { padding: 1.75rem; }
+.demo-panel { display: none; }
+.demo-panel.active { display: block; }
+
+.demo-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  margin-bottom: 1rem;
+}
+.before-title { color: var(--text-dim); }
+.after-title  { color: var(--green); text-shadow: 0 0 12px rgba(57,255,20,0.4); }
+
+.before-body, .after-body {
+  font-size: .9rem;
+  line-height: 1.82;
+  margin-bottom: 1.25rem;
+}
+.before-body { color: var(--text-dim); }
+.after-body  { color: var(--text); }
+
+.after-pq {
+  font-size: .95rem;
+  font-weight: 500;
+  color: #d4eeff;
+  padding: .9rem 0 .9rem 1rem;
+  border-left: 2px solid var(--cyan);
+  margin: 1rem 0;
+  line-height: 1.65;
+  background: rgba(0,255,247,0.03);
+}
+
+.annotations {
+  border-top: 1px solid rgba(155,109,255,0.12);
+  padding-top: 1.25rem;
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+.ann-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: .5rem;
+}
+.ann-row { display: flex; align-items: flex-start; gap: .75rem; }
+.ann-pill {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+  letter-spacing: .06em;
+}
+.ann-pill.bad    { color: var(--pink);  border-color: rgba(255,77,170,0.4); }
+.ann-pill.art    { color: #c4aaff;      border-color: rgba(196,170,255,0.4); }
+.ann-pill.energy { color: var(--amber); border-color: rgba(255,230,0,0.4); }
+.ann-pill.know   { color: var(--green); border-color: rgba(57,255,20,0.35); }
+.ann-pill.pat    { color: var(--pink);  border-color: rgba(255,77,170,0.4); }
+.ann-text { font-size: .85rem; color: var(--text-dim); line-height: 1.62; }
+
+.diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  margin-top: 1.25rem;
+}
+.diff-card {
+  padding: .9rem 1rem;
+  border: 1px solid rgba(155,109,255,0.12);
+  background: rgba(155,109,255,0.04);
+}
+.diff-card.after-card { border-color: rgba(57,255,20,0.2); background: rgba(57,255,20,0.025); }
+.diff-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: .4rem;
+  color: var(--text-muted);
+}
+.diff-card.after-card .diff-label { color: var(--green); }
+.diff-val { font-size: .85rem; color: var(--text-dim); line-height: 1.55; }
+
+/* ── PILLAR LEGEND ── */
+.pillar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .1em;
+}
+.legend-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── FIVE QUESTIONS ── */
+.five-q { margin: 1.75rem 0; display: flex; flex-direction: column; gap: .75rem; }
+.fq-item {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(155,109,255,0.1);
+  background: rgba(155,109,255,0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color .25s, background .25s, box-shadow .25s;
+}
+.fq-item:hover {
+  border-color: rgba(155,109,255,0.3);
+  background: rgba(155,109,255,0.08);
+  box-shadow: 0 0 20px rgba(155,109,255,0.1);
+}
+.fq-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  min-width: 24px;
+  padding-top: 2px;
+  letter-spacing: .1em;
+}
+.fq-num.art    { color: #c4aaff; text-shadow: 0 0 8px rgba(196,170,255,0.5); }
+.fq-num.energy { color: var(--amber); text-shadow: 0 0 8px rgba(255,230,0,0.4); }
+.fq-num.know   { color: var(--green); text-shadow: 0 0 8px rgba(57,255,20,0.4); }
+.fq-num.pat    { color: var(--pink); text-shadow: 0 0 8px rgba(255,77,170,0.4); }
+.fq-text { font-size: .95rem; color: var(--text); line-height: 1.65; }
+
+/* ── FINAL ── */
+.final-section {
+  padding: 4.5rem 0 6rem;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.final-section.revealed { opacity: 1; transform: translateY(0); }
+
+.final-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+.final-divider-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(155,109,255,0.5), transparent);
+}
+.final-divider-mark {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--violet);
+  letter-spacing: .2em;
+  opacity: .7;
+  text-shadow: 0 0 10px rgba(155,109,255,0.5);
+}
+
+.final-statement {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.55;
+  letter-spacing: .03em;
+  margin-bottom: 2.75rem;
+}
+.final-statement .line1 { color: #e0d4ff; }
+.final-statement .line2 { color: var(--text-dim); display: block; margin-top: .3rem; }
+.final-statement .line3 {
+  display: block;
+  margin-top: .3rem;
+  background: linear-gradient(90deg, #c4aaff, #ff80c8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 14px rgba(155,109,255,0.4));
+}
+
+.final-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+/* ── BUTTONS — gradient from reference ── */
+.btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: .8rem 1.6rem;
+  border: none;
+  cursor: crosshair;
+  text-decoration: none;
+  display: inline-block;
+  transition: all .25s;
+  position: relative;
+}
+
+.btn-gradient {
+  background: var(--grad-btn);
+  color: #fff;
+  box-shadow: 0 0 24px rgba(155,109,255,0.4), 0 0 8px rgba(255,77,170,0.3);
+}
+.btn-gradient:hover {
+  box-shadow: 0 0 36px rgba(155,109,255,0.6), 0 0 16px rgba(255,77,170,0.5);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid rgba(155,109,255,0.25);
+}
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: rgba(155,109,255,0.5);
+  box-shadow: 0 0 16px rgba(155,109,255,0.15);
+}
+
+.footer-sig {
+  margin-top: 3rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: .12em;
+}
+
+@media (max-width: 640px) {
+  .container { padding: 0 1.25rem; }
+  header { padding: 3.5rem 0 3rem; }
+  .section { padding: 3rem 0; }
+  .diff-grid { grid-template-columns: 1fr; }
+  .progress-nav { display: none; }
+  .final-actions { flex-direction: column; }
+  .btn { text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="atmo"></div>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+
+<div class="top-bar"><div class="top-bar-fill" id="topBar"></div></div>
+
+<nav class="progress-nav" aria-hidden="true">
+  <div class="progress-dot active"></div>
+  <div class="progress-dot" id="pd1"></div>
+  <div class="progress-dot" id="pd2"></div>
+  <div class="progress-dot" id="pd3"></div>
+  <div class="progress-dot" id="pd4"></div>
+  <div class="progress-dot" id="pd5"></div>
+  <div class="progress-dot" id="pd6"></div>
+  <div class="progress-dot" id="pd7"></div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header id="sec-header">
+    <div class="corner-tl"></div>
+    <div class="corner-br"></div>
+    <div class="header-signal">GF-TX-000 // THE SIGNAL STANDARD // GRAVIFICER.SYS // <span>▊</span></div>
+    <div style="position:relative;display:inline-block">
+      <h1 class="wordmark">GRAVIFICER</h1>
+      <div class="wordmark-ghost">GRAVIFICER</div>
+    </div>
+    <div class="header-subtitle">// GF-TX-000 — THE SIGNAL STANDARD — A DECLARATION IN FOUR MOVEMENTS</div>
+    <p class="header-deck">I built this because good work kept disappearing.</p>
+  </header>
+
+  <!-- 00: POSITION -->
+  <section class="section" id="sec0" data-dot="pd1">
+    <div class="section-meta">
+      <span class="section-index">00 // POSITION</span>
+      <div class="section-line"></div>
+    </div>
+    <h2 class="section-headline">I have watched careful, honest work land with the impact of a wet paper bag.<br>Probably you have too.</h2>
+    <div class="section-body">
+      <p>The research was solid. The design was clean. The thinking was real. And it went nowhere. Not because it was wrong — it wasn't. But because technically correct and actually received are two completely different things, and most of us were trained to care about the first one and assume the second would follow.</p>
+      <p>It doesn't follow. I learned that the hard way, more than once. Good work that doesn't transmit is still good work — but it isn't useful work. And I got tired of making things that were good but not useful.</p>
+      <p>So I started building a system. Not a style. Not a brand. A set of questions I ask before anything leaves my desk.</p>
+    </div>
+    <div class="pullquote">
+      Does this clarify something? Does it reveal something that wasn't visible before? Does it reframe something people thought they already understood? If none of those — it's not ready.
+    </div>
+  </section>
+
+  <!-- 01: ART -->
+  <section class="section" id="sec1" data-dot="pd2">
+    <div class="section-meta">
+      <span class="section-index">01 // MOVEMENT</span>
+      <div class="section-line"></div>
+      <span class="pillar-tag art">Art</span>
+    </div>
+    <h2 class="section-headline">I used to think making something look good was the finish line.<br>It isn't even on the course.</h2>
+    <div class="section-body">
+      <p>For a long time I treated visual work the way most designers do — figure out what needs to be said, then make it look right. The thinking first, the art after. It felt responsible. Logical, even.</p>
+      <p>But I kept noticing that the pieces where I did the visual work last never quite landed the way the ones did where I'd figured out the form and the idea at the same time. The art wasn't finishing the thought. When it worked, the art was doing its own thinking — making relationships visible, creating understanding before the words could explain it.</p>
+      <p>That's what I mean by Visual Logic Architecture. Not illustration. Not decoration. Using visual form to make something knowable that couldn't be known any other way. The eye gets there before the mind does. If I can put something true in front of your eyes, you understand it before you decide whether to.</p>
+    </div>
+    <div class="note-block art">
+      <div class="note-label">What I still catch myself doing</div>
+      <div class="note-text">Reaching for aesthetics when I should be reaching for structure. Making something beautiful when the problem is that the logic isn't visible yet. Beautiful and legible are not the same thing — I have to remind myself of that constantly.</div>
+    </div>
+    <div class="axiom violet">Make the invisible legible. The eye is the first mind.</div>
+  </section>
+
+  <!-- 02: ENERGY -->
+  <section class="section" id="sec2" data-dot="pd3">
+    <div class="section-meta">
+      <span class="section-index">02 // MOVEMENT</span>
+      <div class="section-line"></div>
+      <span class="pillar-tag energy">Energy</span>
+    </div>
+    <h2 class="section-headline">Flat work isn't calm.<br>It's a piece that hasn't found its stakes yet.</h2>
+    <div class="section-body">
+      <p>You know the feeling. You finish something and it's correct, it's complete, it's fine — and you know it won't move anyone. Not because it's bad. Because it's inert. There's nothing pulling the reader forward, no sense that something is being decided, no reason to stay.</p>
+      <p>I used to try to fix that with tone. Make it sound more confident. More urgent. But louder inert is still inert. The problem isn't the voice — it's the architecture. The piece warms up instead of entering at consequence. It adds evidence instead of contrast. It covers everything instead of choosing what matters.</p>
+      <p>Energy in a piece of work isn't something you add. It's what's left after you've cut everything that costs attention without giving anything back. The pieces I'm most proud of aren't the most dense ones. They're the ones where I was honest enough to remove what I'd worked hard to put in.</p>
+    </div>
+    <div class="note-block energy">
+      <div class="note-label">The hardest cut</div>
+      <div class="note-text">The paragraph you're most attached to is usually the one slowing everything down. It's often where the idea first clicked for you — which means it's where you were figuring it out, not where you're transmitting it.</div>
+    </div>
+    <div class="axiom amber">A signal without force is just noise with better posture.</div>
+  </section>
+
+  <!-- 03: KNOWLEDGE -->
+  <section class="section" id="sec3" data-dot="pd4">
+    <div class="section-meta">
+      <span class="section-index">03 // MOVEMENT</span>
+      <div class="section-line"></div>
+      <span class="pillar-tag know">Knowledge</span>
+    </div>
+    <h2 class="section-headline">I spent years summarizing things well.<br>That's not the same as knowing what to do with them.</h2>
+    <div class="section-body">
+      <p>Research, reading, absorbing — I was good at it. I could take a complex topic and give you a clean, accurate summary faster than most. I thought that was the skill. It isn't. That's intake. The actual work starts after.</p>
+      <p>The question I learned to ask isn't what does this say. It's what does this make possible that didn't exist before I read it. What's the thing this research contains that the research itself can't see — because you can only see it from outside, after you've put it through something else you know?</p>
+      <p>When I get that right, the output is something the source material couldn't be on its own. When I get it wrong, I've produced a well-organized relay. Useful, maybe. But not a transmission. There's a difference between passing information along and transforming it into something the person receiving it couldn't have gotten anywhere else.</p>
+    </div>
+    <div class="note-block know">
+      <div class="note-label">How I check myself</div>
+      <div class="note-text">I ask: could someone have gotten this from reading the original source? If yes, I haven't done the work yet. I've just cleaned up someone else's thinking. The forge hasn't run.</div>
+    </div>
+    <div class="axiom green">Knowledge is raw material to reshape, not repeat.</div>
+  </section>
+
+  <!-- 04: PATTERNS -->
+  <section class="section" id="sec4" data-dot="pd5">
+    <div class="section-meta">
+      <span class="section-index">04 // MOVEMENT</span>
+      <div class="section-line"></div>
+      <span class="pillar-tag pat">Patterns</span>
+    </div>
+    <h2 class="section-headline">The moment I started seeing patterns everywhere was when the other three pillars stopped feeling like separate things.</h2>
+    <div class="section-body">
+      <p>I don't know exactly when it happened. Somewhere between studying how visual rhythm works in design and reading about locomotor-respiratory coupling in distance running, I noticed that the same underlying structure was appearing in both. Not a metaphor. The same logic — how a system finds efficiency through repeating cycles — operating at completely different scales in completely different domains.</p>
+      <p>Once you start seeing that, you can't stop. Art has a grammar. Energy has a rhythm. Knowledge has an architecture. Patterns is the perception that reveals all three simultaneously — and the material that all three are made of.</p>
+      <p>Patterns is the only one of the four that works both as something you study and as a tool you use to sharpen everything else. That's why it runs through the whole system. Not the most important pillar — there's no hierarchy. Just the one that multiplies the others when it's working.</p>
+    </div>
+    <div class="note-block pat">
+      <div class="note-label">Why this matters practically</div>
+      <div class="note-text">An insight about visual grammar that you also recognize in running cadence and sentence rhythm isn't three separate insights. It's one insight with three proofs. That's leverage — and it compounds the more domains you're paying attention to.</div>
+    </div>
+    <div class="axiom pink">The only material that can also be used as a tool.</div>
+  </section>
+
+  <!-- 05: DEMONSTRATION -->
+  <section class="section" id="sec5" data-dot="pd6">
+    <div class="section-meta">
+      <span class="section-index">05 // DEMONSTRATION</span>
+      <div class="section-line"></div>
+    </div>
+    <h2 class="section-headline">Show me an example.</h2>
+    <div class="section-body">
+      <p>Here is the Visual Logic Architect concept — the core of Movement 01 — written two ways. The first is a relay: accurate, organized, something anyone with access to the same sources could have written. The second is a Gravificer transmission. Toggle between them and watch what the system actually does.</p>
+    </div>
+
+    <div class="demo-frame">
+      <div class="demo-tabs">
+        <button class="demo-tab active" id="tab-before" onclick="showDemo('before')">Before — raw relay</button>
+        <button class="demo-tab after-tab" id="tab-after" onclick="showDemo('after')">After — transmission</button>
+      </div>
+      <div class="demo-body">
+
+        <div class="demo-panel active" id="dp-before">
+          <div class="demo-title before-title">What is a Visual Logic Architect?</div>
+          <div class="before-body">
+            <p>A Visual Logic Architect is a design professional who uses visual communication to convey complex ideas and systems. Unlike traditional graphic designers who focus primarily on aesthetics, Visual Logic Architects prioritize clarity and the effective communication of information.</p>
+            <p>The role combines skills from graphic design, information architecture, and visual thinking. Visual Logic Architects create diagrams, infographics, and visual systems that help audiences understand difficult concepts.</p>
+            <p>The key difference between a Visual Logic Architect and a traditional designer is the emphasis on function over form. While both require strong visual skills, the Visual Logic Architect's primary goal is to make information accessible rather than simply visually appealing.</p>
+          </div>
+          <div class="annotations">
+            <div class="ann-label">What went wrong</div>
+            <div class="ann-row"><span class="ann-pill bad">no energy</span><div class="ann-text">Opens with a definition. Warms up before arriving anywhere. Nothing pulls you forward.</div></div>
+            <div class="ann-row"><span class="ann-pill bad">relay logic</span><div class="ann-text">"Combines skills from graphic design…" — a LinkedIn summary. Tells you what goes in, not what comes out.</div></div>
+            <div class="ann-row"><span class="ann-pill bad">no stakes</span><div class="ann-text">"Function over form" has been said so many times it carries no weight. Named but never felt.</div></div>
+          </div>
+        </div>
+
+        <div class="demo-panel" id="dp-after">
+          <div class="pillar-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#c4aaff"></div><span style="color:#c4aaff">Art</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div><span style="color:var(--amber)">Energy</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span style="color:var(--green)">Knowledge</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div><span style="color:var(--pink)">Patterns</span></div>
+          </div>
+          <div class="demo-title after-title">The thing nobody told me about design</div>
+          <div class="after-body">
+            <p>Most design education teaches you to solve for the surface. Make it clear. Make it beautiful. Make it work. Nobody tells you that the surface is downstream of a decision that already happened — a decision about what the work is actually for.</p>
+            <div class="after-pq">There is a version of design that decorates. And there is a version that thinks. They can look identical from the outside. They produce completely different results.</div>
+            <p>The decorating version asks: how do I make this better? The thinking version asks: what does the person on the other side need to understand — and what is the visual form that makes that understanding unavoidable?</p>
+            <p>I came to this slowly, through failure. Work I was proud of that didn't land. Eventually I stopped asking why it looked good and started asking why it didn't move anyone. The answer, almost every time: I had treated the visual as the finish line when it was actually the mechanism. Decorating conclusions instead of constructing understanding.</p>
+          </div>
+          <div class="annotations">
+            <div class="ann-label">What the system did</div>
+            <div class="ann-row"><span class="ann-pill energy">energy</span><div class="ann-text">"Nobody told me" opens with withheld information. A hook before the argument. No warm-up.</div></div>
+            <div class="ann-row"><span class="ann-pill art">art</span><div class="ann-text">The pullquote does visual work — eye lands on core tension before the mind processes the argument.</div></div>
+            <div class="ann-row"><span class="ann-pill know">knowledge</span><div class="ann-text">"I came to this slowly, through failure" — experience transforms definition into lived knowledge.</div></div>
+            <div class="ann-row"><span class="ann-pill pat">patterns</span><div class="ann-text">"Decorating conclusions instead of constructing understanding" names a pattern the reader has felt but never had words for.</div></div>
+          </div>
+          <div class="diff-grid">
+            <div class="diff-card"><div class="diff-label">Before</div><div class="diff-val">Could have been written by anyone with access to the same sources.</div></div>
+            <div class="diff-card after-card"><div class="diff-label">After</div><div class="diff-val">Contains something the source material couldn't produce on its own.</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 06: FIVE QUESTIONS -->
+  <section class="section" id="sec6" data-dot="pd7">
+    <div class="section-meta">
+      <span class="section-index">06 // PRACTICE</span>
+      <div class="section-line"></div>
+    </div>
+    <h2 class="section-headline">Five questions I ask before anything ships</h2>
+    <div class="section-body">
+      <p>Not rules. Questions. Rules tell you when you've failed. Questions help you figure out what's missing.</p>
+    </div>
+    <div class="five-q">
+      <div class="fq-item"><div class="fq-num art">01</div><div class="fq-text">Does this clarify, reveal, or reframe — or is it just adding to the pile?</div></div>
+      <div class="fq-item"><div class="fq-num art">02</div><div class="fq-text">Is the visual form doing cognitive work, or just making the piece look considered?</div></div>
+      <div class="fq-item"><div class="fq-num energy">03</div><div class="fq-text">Where does the energy drop? What am I holding onto that's costing more than it's giving?</div></div>
+      <div class="fq-item"><div class="fq-num know">04</div><div class="fq-text">Could someone have gotten this from the original source? If yes — what's the transformation I haven't done yet?</div></div>
+      <div class="fq-item"><div class="fq-num pat">05</div><div class="fq-text">What pattern is operating here that I haven't named yet — and what would change if I named it?</div></div>
+    </div>
+  </section>
+
+  <!-- FINAL -->
+  <div class="final-section" id="sec-final">
+    <div class="final-divider">
+      <div class="final-divider-line"></div>
+      <div class="final-divider-mark">END TRANSMISSION</div>
+      <div class="final-divider-line"></div>
+    </div>
+    <div class="final-statement">
+      <span class="line1">Gravificer isn't a finished system.</span>
+      <span class="line2">It's a practice I'm still inside.</span>
+      <span class="line3">These are just the questions that keep making the work better.</span>
+    </div>
+    <div class="final-actions">
+      <a href="#sec-header" class="btn btn-gradient">Read again ↑</a>
+      <a href="https://quirkyflashchronicles.com" class="btn btn-ghost" target="_blank">Gravificer archive →</a>
+    </div>
+    <div class="footer-sig">GF-TX-000 — THE SIGNAL STANDARD // GRAVIFICER // MVANNP // quirkyflashchronicles.com</div>
+  </div>
+
+</div>
+
+<script>
+function showDemo(p){
+  ['before','after'].forEach(id=>{
+    document.getElementById('dp-'+id).classList.toggle('active',id===p);
+  });
+  document.getElementById('tab-before').classList.toggle('active',p==='before');
+  document.getElementById('tab-after').classList.toggle('active',p==='after');
+}
+
+const secs=['sec0','sec1','sec2','sec3','sec4','sec5','sec6','sec-final'];
+const dotIds=[null,'pd1','pd2','pd3','pd4','pd5','pd6','pd7'];
+
+function onScroll(){
+  const scrolled=window.scrollY;
+  const total=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('topBar').style.width=Math.round((scrolled/total)*100)+'%';
+  secs.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const rect=el.getBoundingClientRect();
+    if(rect.top<window.innerHeight*.88) el.classList.add('revealed');
+    if(dotIds[i]){
+      const dot=document.getElementById(dotIds[i]);
+      if(dot) dot.classList.toggle('active',rect.top<window.innerHeight*.5&&rect.bottom>0);
+    }
+  });
+}
+
+window.addEventListener('scroll',onScroll,{passive:true});
+setTimeout(onScroll,100);
+setTimeout(onScroll,600);
+</script>
+</body>
+</html>
