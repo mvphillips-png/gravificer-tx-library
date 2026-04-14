@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GF-TX-001 — Signal Trainer // Skill 01 // Gravificer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #04060a;
+  --bg2:     #07080f;
+  --bg3:     #0a0c16;
+  --cyan:    #00fff7;
+  --magenta: #ff003c;
+  --amber:   #ffe600;
+  --green:   #39ff14;
+  --violet:  #9b6dff;
+  --pink:    #ff4daa;
+  --text:    #d0d8f0;
+  --text-dim:#6070a0;
+  --text-muted:#35405a;
+  --border:        rgba(155,109,255,0.15);
+  --border-hot:    rgba(155,109,255,0.4);
+  --border-cyan:   rgba(0,255,247,0.2);
+  --grad-btn: linear-gradient(90deg,#9b6dff,#ff4daa);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:400;line-height:1.75;cursor:crosshair;overflow-x:hidden;min-height:100vh}
+::selection{background:rgba(155,109,255,0.3);color:#e8d8ff}
+
+.atmo{position:fixed;inset:0;pointer-events:none;z-index:0;background:
+  radial-gradient(ellipse 80% 60% at 70% 10%,rgba(80,20,140,0.4) 0%,transparent 70%),
+  radial-gradient(ellipse 60% 50% at 10% 80%,rgba(120,20,80,0.25) 0%,transparent 65%)}
+.grid-overlay{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:
+  linear-gradient(rgba(155,109,255,0.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(155,109,255,0.04) 1px,transparent 1px);
+  background-size:44px 44px}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:0;background:
+  repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px)}
+
+.container{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 2rem}
+
+/* TOP BAR */
+.top-bar{position:fixed;top:0;left:0;right:0;height:2px;background:rgba(155,109,255,0.12);z-index:200}
+.top-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));width:0%;transition:width .3s;box-shadow:0 0 10px rgba(155,109,255,0.5)}
+
+/* HEADER */
+header{padding:4.5rem 0 3rem;border-bottom:1px solid var(--border);position:relative}
+.corner-tl,.corner-br{position:absolute;width:20px;height:20px}
+.corner-tl{top:1.5rem;left:0;border-top:1px solid var(--violet);border-left:1px solid var(--violet);opacity:.6}
+.corner-br{bottom:-1px;right:0;border-bottom:1px solid var(--violet);border-right:1px solid var(--violet);opacity:.6}
+.header-sig{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--violet);letter-spacing:.2em;margin-bottom:1.5rem;opacity:.65}
+.header-sig span{animation:blink 1.4s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.wordmark-wrap{position:relative;display:inline-block;margin-bottom:.4rem}
+.wordmark{font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.8rem);font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1;background:linear-gradient(135deg,#c4aaff 0%,#ff80c8 55%,#00fff7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 16px rgba(155,109,255,0.45))}
+.wordmark-ghost{position:absolute;top:0;left:0;font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.8rem);font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1;color:transparent;-webkit-text-stroke:.5px rgba(155,109,255,0.15);animation:ghostShift 6s ease-in-out infinite;pointer-events:none;white-space:nowrap}
+@keyframes ghostShift{0%,100%{transform:translate(0,0);opacity:.4}30%{transform:translate(2px,-1px);opacity:.2}60%{transform:translate(-2px,1px);opacity:.5}}
+.header-tx{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.1em;margin-bottom:2rem}
+.header-deck{font-size:1rem;font-weight:300;color:var(--text);max-width:500px;line-height:1.8}
+.header-deck strong{font-weight:500;color:#e0d4ff}
+
+/* SKILL INTRO */
+.skill-intro{padding:2.5rem 0;border-bottom:1px solid var(--border)}
+.skill-meta{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem}
+.skill-index{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.15em}
+.skill-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.skill-tag{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:4px 12px;border:1px solid rgba(196,170,255,0.4);color:#c4aaff;text-shadow:0 0 10px rgba(196,170,255,0.4)}
+.skill-headline{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,2.2vw,1.3rem);font-weight:700;color:#e8e0ff;line-height:1.4;margin-bottom:1rem;letter-spacing:.02em}
+.skill-body{font-size:.95rem;color:var(--text);line-height:1.85;max-width:620px}
+.skill-body p{margin-bottom:.9rem}
+.skill-body p:last-child{margin-bottom:0}
+
+/* THREE MOVES */
+.moves-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:1.5rem 0}
+.move-card{padding:1rem;border:1px solid;background:rgba(155,109,255,0.04);backdrop-filter:blur(6px)}
+.move-card.clarify{border-color:rgba(196,170,255,0.25)}
+.move-card.reveal {border-color:rgba(0,255,247,0.2)}
+.move-card.reframe{border-color:rgba(255,230,0,0.2)}
+.move-label{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px}
+.move-card.clarify .move-label{color:#c4aaff}
+.move-card.reveal  .move-label{color:var(--cyan)}
+.move-card.reframe .move-label{color:var(--amber)}
+.move-def{font-size:12px;color:var(--text-dim);line-height:1.6}
+
+/* TRAINING AREA */
+.training-area{padding:2.5rem 0}
+.training-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.training-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--violet);text-shadow:0 0 10px rgba(155,109,255,0.4)}
+.training-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(155,109,255,0.3),transparent)}
+.session-meta{display:flex;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.session-stat{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.1em}
+.session-stat span{color:var(--violet)}
+
+/* SCENARIO CARD */
+.scenario-frame{border:1px solid rgba(155,109,255,0.3);background:rgba(10,8,22,0.6);backdrop-filter:blur(12px);position:relative;margin-bottom:1rem;box-shadow:0 0 40px rgba(155,109,255,0.08),inset 0 0 40px rgba(155,109,255,0.02)}
+.scenario-frame::before{content:'SCENARIO';position:absolute;top:-9px;left:1.5rem;background:var(--bg);padding:0 .6rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--violet);letter-spacing:.2em;text-shadow:0 0 8px rgba(155,109,255,0.5)}
+.scenario-body{padding:1.5rem}
+.scenario-type{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.75rem}
+.scenario-content{font-size:.95rem;color:var(--text);line-height:1.85;margin-bottom:1.25rem}
+.scenario-content p{margin-bottom:.8rem}
+.scenario-content p:last-child{margin-bottom:0}
+.scenario-prompt{font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700;color:#e0d4ff;letter-spacing:.03em;padding:.9rem 1.1rem;border:1px solid rgba(155,109,255,0.25);background:rgba(155,109,255,0.06);line-height:1.45}
+
+/* RESPONSE AREA */
+.response-section{margin-bottom:1rem}
+.response-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.response-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.response-input{width:100%;background:rgba(155,109,255,0.04);border:1px solid rgba(155,109,255,0.2);color:var(--text);font-family:'Exo 2',sans-serif;font-size:.9rem;line-height:1.7;padding:.9rem 1.1rem;resize:vertical;min-height:110px;cursor:crosshair;transition:border-color .2s}
+.response-input:focus{outline:none;border-color:rgba(155,109,255,0.5);background:rgba(155,109,255,0.06)}
+.response-input::placeholder{color:var(--text-muted);font-style:italic}
+
+/* SUBMIT BTN */
+.submit-row{display:flex;gap:.75rem;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.btn-submit{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:.8rem 1.6rem;border:none;background:var(--grad-btn);color:#fff;cursor:crosshair;transition:all .25s;box-shadow:0 0 20px rgba(155,109,255,0.35)}
+.btn-submit:hover{box-shadow:0 0 32px rgba(155,109,255,0.55);transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-next{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:.8rem 1.4rem;border:1px solid rgba(155,109,255,0.3);background:transparent;color:var(--text-dim);cursor:crosshair;transition:all .2s}
+.btn-next:hover{border-color:rgba(155,109,255,0.5);color:var(--text)}
+.btn-next:disabled{opacity:.3;cursor:not-allowed}
+.thinking-indicator{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--violet);letter-spacing:.1em;display:none;animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* DIAGNOSIS OUTPUT */
+.diagnosis-frame{border:1px solid rgba(57,255,20,0.25);background:rgba(10,18,10,0.7);backdrop-filter:blur(10px);position:relative;margin-bottom:1.5rem;display:none}
+.diagnosis-frame.show{display:block}
+.diagnosis-frame::before{content:'SIGNAL DIAGNOSIS';position:absolute;top:-9px;left:1.5rem;background:var(--bg);padding:0 .6rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);letter-spacing:.2em;text-shadow:0 0 8px rgba(57,255,20,0.4)}
+.diagnosis-body{padding:1.5rem;font-size:.9rem;color:var(--text);line-height:1.85}
+.diagnosis-body p{margin-bottom:.85rem}
+.diagnosis-body p:last-child{margin-bottom:0}
+.diagnosis-verdict{display:flex;gap:.75rem;align-items:flex-start;padding:.85rem 1rem;border:1px solid;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.06em;line-height:1.5}
+.verdict-clarify{border-color:rgba(196,170,255,0.4);background:rgba(155,109,255,0.08);color:#c4aaff}
+.verdict-reveal {border-color:rgba(0,255,247,0.3);background:rgba(0,255,247,0.05);color:var(--cyan)}
+.verdict-reframe{border-color:rgba(255,230,0,0.3);background:rgba(255,230,0,0.05);color:var(--amber)}
+.verdict-noise  {border-color:rgba(255,0,60,0.3);background:rgba(255,0,60,0.05);color:var(--magenta)}
+.verdict-mixed  {border-color:rgba(155,109,255,0.3);background:rgba(155,109,255,0.06);color:var(--violet)}
+.verdict-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* SCORE */
+.score-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.score-pill{font-family:'Share Tech Mono',monospace;font-size:10px;padding:4px 12px;border:1px solid;letter-spacing:.08em}
+.score-sharp {color:var(--green); border-color:rgba(57,255,20,0.35);background:rgba(57,255,20,0.05)}
+.score-close {color:var(--amber); border-color:rgba(255,230,0,0.35);background:rgba(255,230,0,0.04)}
+.score-missed{color:var(--magenta);border-color:rgba(255,0,60,0.35);background:rgba(255,0,60,0.05)}
+
+/* SESSION COMPLETE */
+.session-complete{border:1px solid rgba(155,109,255,0.3);background:rgba(10,8,22,0.7);backdrop-filter:blur(12px);padding:2rem;text-align:center;display:none}
+.session-complete.show{display:block}
+.complete-mark{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(155,109,255,0.2),rgba(255,77,170,0.2));border:1px solid rgba(155,109,255,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:20px}
+.complete-title{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:#e0d4ff;margin-bottom:.75rem;letter-spacing:.03em}
+.complete-sub{font-size:.9rem;color:var(--text-dim);line-height:1.7;margin-bottom:1.5rem;max-width:420px;margin-left:auto;margin-right:auto}
+.complete-actions{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+
+/* PROGRESS DOTS */
+.progress-dots{display:flex;gap:6px;margin-bottom:1.25rem;align-items:center}
+.prog-dot{width:8px;height:8px;border-radius:50%;border:1px solid rgba(155,109,255,0.3);background:transparent;transition:all .3s}
+.prog-dot.done{background:var(--violet);border-color:var(--violet);box-shadow:0 0 6px var(--violet)}
+.prog-dot.current{background:transparent;border-color:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.prog-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.1em;margin-left:.25rem}
+
+/* DIFFICULTY */
+.difficulty-row{display:flex;gap:6px;margin-bottom:1.5rem}
+.diff-btn{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;padding:5px 12px;border:1px solid rgba(155,109,255,0.2);background:transparent;color:var(--text-muted);cursor:crosshair;transition:all .15s}
+.diff-btn.active{border-color:var(--violet);color:var(--violet);background:rgba(155,109,255,0.08);text-shadow:0 0 8px rgba(155,109,255,0.5)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:1.5rem 0 3rem;margin-top:3rem}
+.footer-sig{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em}
+
+@media(max-width:600px){
+  .container{padding:0 1.25rem}
+  .moves-grid{grid-template-columns:1fr}
+  header{padding:3.5rem 0 2.5rem}
+  .complete-actions{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<div class="atmo"></div>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+<div class="top-bar"><div class="top-bar-fill" id="topFill"></div></div>
+
+<div class="container">
+
+  <header>
+    <div class="corner-tl"></div>
+    <div class="corner-br"></div>
+    <div class="header-sig">GF-TX-001 // SIGNAL TRAINER // GRAVIFICER.SYS // <span>▊</span></div>
+    <div class="wordmark-wrap">
+      <div class="wordmark">GRAVIFICER</div>
+      <div class="wordmark-ghost">GRAVIFICER</div>
+    </div>
+    <div class="header-tx">// SIGNAL TRAINER — SKILL 01 OF 05</div>
+    <p class="header-deck">The five questions are not checklists. They are <strong>perceptual tools</strong> — ways of seeing that sharpen with practice. This trainer builds the muscle, one scenario at a time.</p>
+  </header>
+
+  <section class="skill-intro">
+    <div class="skill-meta">
+      <span class="skill-index">SKILL 01 // EVALUATIVE</span>
+      <div class="skill-line"></div>
+      <span class="skill-tag">Clarify · Reveal · Reframe</span>
+    </div>
+    <h1 class="skill-headline">Does this clarify, reveal, or reframe?<br>Or is it just adding to the pile?</h1>
+    <div class="skill-body">
+      <p>This is the first and most fundamental question in the Gravificer system. Before anything ships, it has to pass this test. But passing the test requires understanding what each of these three moves actually is — because they are distinct operations, not synonyms.</p>
+    </div>
+
+    <div class="moves-grid">
+      <div class="move-card clarify">
+        <div class="move-label">Clarify</div>
+        <div class="move-def">Takes something complex and compresses it to its essential structure. The reader understands something they couldn't hold before. The complexity doesn't disappear — it becomes navigable.</div>
+      </div>
+      <div class="move-card reveal">
+        <div class="move-label">Reveal</div>
+        <div class="move-def">Makes visible something that was present but unnamed. A pattern, a tension, a relationship that existed in the material but had no form until this piece gave it one.</div>
+      </div>
+      <div class="move-card reframe">
+        <div class="move-label">Reframe</div>
+        <div class="move-def">Changes the frame around the same facts. The reader now sees the same material as a different kind of problem — or a different kind of opportunity. The facts haven't changed. What they mean has.</div>
+      </div>
+    </div>
+
+    <div class="skill-body">
+      <p>Work that does none of these things is noise — regardless of its quality, accuracy, or polish. In this trainer, you'll be shown pieces of work and asked to identify which move they're making — or whether they're making any move at all. Claude will diagnose your read and sharpen your perception over a series of scenarios.</p>
+    </div>
+  </section>
+
+  <section class="training-area" id="trainingArea">
+    <div class="training-header">
+      <div class="training-title">Training Session</div>
+      <div class="training-line"></div>
+    </div>
+
+    <div class="session-meta">
+      <div class="session-stat">Round <span id="roundNum">1</span> of <span id="roundTotal">4</span></div>
+      <div class="session-stat">Score <span id="scoreDisplay">0</span></div>
+      <div class="session-stat">Difficulty <span id="diffLabel">Standard</span></div>
+    </div>
+
+    <div class="difficulty-row" id="diffRow">
+      <button class="diff-btn active" onclick="setDiff('standard')">Standard</button>
+      <button class="diff-btn" onclick="setDiff('advanced')">Advanced</button>
+      <button class="diff-btn" onclick="setDiff('edge')">Edge Cases</button>
+    </div>
+
+    <div class="progress-dots" id="progressDots"></div>
+
+    <div id="loadingScenario" style="display:none;padding:2rem 0;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--violet);letter-spacing:.1em;animation:pulse .8s ease-in-out infinite">
+      // GENERATING SCENARIO — PLEASE HOLD
+    </div>
+
+    <div id="scenarioArea">
+      <div class="scenario-frame" id="scenarioFrame">
+        <div class="scenario-body">
+          <div class="scenario-type" id="scenarioType"></div>
+          <div class="scenario-content" id="scenarioContent"></div>
+          <div class="scenario-prompt" id="scenarioPrompt"></div>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <div class="response-label">Your read</div>
+        <textarea class="response-input" id="responseInput" placeholder="Which move is this making — clarify, reveal, or reframe? Or is it noise? Explain what you see in the work itself..."></textarea>
+      </div>
+
+      <div class="submit-row">
+        <button class="btn-submit" id="submitBtn" onclick="submitResponse()">Submit read →</button>
+        <div class="thinking-indicator" id="thinkingIndicator">// CLAUDE IS READING YOUR SIGNAL</div>
+      </div>
+
+      <div class="diagnosis-frame" id="diagnosisFrame">
+        <div class="diagnosis-body" id="diagnosisBody"></div>
+      </div>
+
+      <div style="display:none" id="nextRow">
+        <button class="btn-next" id="nextBtn" onclick="nextScenario()">Next scenario →</button>
+      </div>
+    </div>
+
+    <div class="session-complete" id="sessionComplete">
+      <div class="complete-mark">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><polyline points="4,11 9,16 18,6" stroke="#9b6dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="complete-title">Session complete</div>
+      <div class="complete-sub" id="completeSummary"></div>
+      <div class="complete-actions">
+        <button class="btn-submit" onclick="restartSession()">Run another session →</button>
+        <a href="https://tx.quirkyflashchronicles.com" class="btn-next" style="text-decoration:none;display:inline-flex;align-items:center">← TX Library</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-sig">GF-TX-001 — SIGNAL TRAINER // SKILL 01 // GRAVIFICER // MVANNP // POWERED BY CLAUDE — ANTHROPIC</div>
+  </footer>
+</div>
+
+<script>
+const ROUNDS_PER_SESSION = 4;
+let currentRound = 0;
+let score = 0;
+let difficulty = 'standard';
+let sessionScenarios = [];
+let sessionHistory = [];
+
+const scenarios = {
+  standard: [
+    {
+      type:'WRITTEN CONTENT // BLOG POST OPENING',
+      content:`<p>Social media has changed how we communicate. Platforms like Instagram, Twitter, and TikTok have made it easier than ever to share content with large audiences. Many businesses and creators use these platforms to grow their following and reach new customers. However, it's important to understand how algorithms work and to post consistently if you want to grow.</p>`,
+      prompt:'Does this clarify, reveal, or reframe something — or is it noise? What move, if any, is it making?',
+      correctMove:'noise',
+      hint:'Information that was already known, organized without transformation.'
+    },
+    {
+      type:'WRITTEN CONTENT // DESIGN INSIGHT',
+      content:`<p>Most designers talk about hierarchy as if it's a rule about size. Make the headline big, the body small. But hierarchy isn't about size — it's about sequence. It tells the eye where to go next. A small element in the right position can outrank a large one that's placed wrong.</p><p>The moment you understand hierarchy as sequencing rather than sizing, every layout decision changes.</p>`,
+      prompt:'Does this clarify, reveal, or reframe something — or is it noise? What move, if any, is it making?',
+      correctMove:'reframe',
+      hint:'Same facts (hierarchy in design) but the frame shifts — from size to sequence. The reader now sees layout decisions differently.'
+    },
+    {
+      type:'VISUAL CONTENT // INFOGRAPHIC DESCRIPTION',
+      content:`<p>An infographic about global water usage shows a large blue circle representing the world's water. A smaller circle represents freshwater. An even smaller circle represents accessible freshwater. Three nested circles, largest to smallest, with percentage labels on each.</p>`,
+      prompt:'Does this clarify, reveal, or reframe something — or is it noise? What move, if any, is it making?',
+      correctMove:'reveal',
+      hint:'The relationship between total water and accessible water existed in the data — but the nested circle form makes the scale visible in a way numbers alone cannot.'
+    },
+    {
+      type:'WRITTEN CONTENT // CREATIVE BRIEF SUMMARY',
+      content:`<p>The campaign is for a new running shoe. Target audience is 25-40 year old active consumers. Key message is performance and comfort. Deliverables include social media posts, a landing page, and email creative. Timeline is six weeks. Budget is mid-range.</p>`,
+      prompt:'Does this clarify, reveal, or reframe something — or is it noise? What move, if any, is it making?',
+      correctMove:'noise',
+      hint:'A relay of logistical facts. Organized, accurate — but no transformation. Nothing here couldn\'t have been read directly from the brief.'
+    },
+    {
+      type:'WRITTEN CONTENT // SPORTS SCIENCE NOTE',
+      content:`<p>Fatigue in distance running isn't just muscular — it's perceptual. Your brain starts throttling effort before your muscles actually fail, as a protective mechanism. What feels like hitting a wall is often the brain anticipating damage, not actual structural failure. This means that in the final miles of a race, the limiting factor is often psychological access to reserves that are physically still available.</p>`,
+      prompt:'Does this clarify, reveal, or reframe something — or is it noise? What move, if any, is it making?',
+      correctMove:'reframe',
+      hint:'Runner knows fatigue. This shifts the frame from muscular failure to perceptual protection — same experience, entirely different problem to solve.'
+    },
+    {
+      type:'VISUAL CONTENT // DATA VISUALIZATION',
+      content:`<p>A bar chart showing monthly revenue for the past 12 months. Bars are blue. The y-axis goes from $0 to $500,000. Each bar is labeled with the exact revenue figure. The chart is titled "Monthly Revenue 2024." No trendline, no annotations, no comparison data.</p>`,
+      prompt:'Does this clarify, reveal, or reframe something — or is it noise? What move, if any, is it making?',
+      correctMove:'noise',
+      hint:'Data displayed without transformation. The viewer has to do all the interpretive work. No pattern is drawn, no tension revealed, no structure clarified.'
+    }
+  ],
+  advanced: [
+    {
+      type:'WRITTEN CONTENT // STRATEGY MEMO EXCERPT',
+      content:`<p>Our customer retention problem isn't a loyalty problem. Customers who leave aren't disloyal — they simply encountered a moment where the friction of staying exceeded the friction of leaving. The question isn't how do we make customers more loyal, it's how do we reduce the number of moments where leaving becomes easier than staying.</p>`,
+      prompt:'Does this clarify, reveal, or reframe — or noise? Be specific about which move and what evidence in the text supports your read.',
+      correctMove:'reframe',
+      hint:'The frame shifts from loyalty (an attitude problem requiring emotional solutions) to friction (a structural problem requiring process solutions). Same retention challenge, entirely different solution space.'
+    },
+    {
+      type:'VISUAL CONTENT // DIAGRAM DESCRIPTION',
+      content:`<p>A diagram showing the relationship between training load and performance in athletes. The x-axis shows cumulative training load over time. The y-axis shows performance output. The curve rises steeply, then plateaus, then dips before rising again. The dip is labeled "adaptation lag." An annotation reads: "The dip isn't failure — it's where the adaptation is happening."</p>`,
+      prompt:'Does this clarify, reveal, or reframe — or noise? Be specific about which move and what evidence in the text supports your read.',
+      correctMove:'reveal',
+      hint:'The dip was in every athlete\'s data — but unnamed, it looked like regression. The diagram gives it form and a label that changes what the athlete does next.'
+    },
+    {
+      type:'WRITTEN CONTENT // CREATIVE DIRECTION NOTE',
+      content:`<p>The visual direction for this campaign should feel premium and aspirational. We want clean lines, sophisticated typography, and imagery that communicates quality. The color palette should be muted and refined. We're targeting a discerning audience who appreciates craftsmanship.</p>`,
+      prompt:'Does this clarify, reveal, or reframe — or noise? Be specific about which move and what evidence in the text supports your read.',
+      correctMove:'noise',
+      hint:'This describes a category ("premium") without defining it. Every word could apply to a thousand different campaigns. No structure is compressed, nothing hidden is named, no frame shifts.'
+    },
+    {
+      type:'WRITTEN CONTENT // EDITORIAL OBSERVATION',
+      content:`<p>The most useful thing a mentor ever told me wasn't advice. It was a question: "What would you do if you already knew the answer?" I've used it hundreds of times since. Not because it unlocks hidden knowledge — but because most problems that feel like information problems are actually permission problems. You already know. You're waiting for someone to tell you it's okay to act on it.</p>`,
+      prompt:'Does this clarify, reveal, or reframe — or noise? Be specific about which move and what evidence in the text supports your read.',
+      correctMove:'reveal',
+      hint:'The distinction between information problems and permission problems existed in the reader\'s experience — but unnamed. The piece gives it a form that makes it recognizable and actionable.'
+    }
+  ],
+  edge: [
+    {
+      type:'WRITTEN CONTENT // COMPLEX CASE',
+      content:`<p>Creativity isn't the absence of constraints — it's the productive use of them. Every creative tradition worth studying emerged from a specific set of limitations: the sonnet's 14 lines, the haiku's 17 syllables, the blues' 12-bar structure. These aren't accidents. Constraints force specificity, and specificity is what makes work resonant rather than generic.</p><p>The implication for creative practice: if you're stuck, the problem isn't usually that you have too few options. It's that you have too many.</p>`,
+      prompt:'This one is doing more than one thing. Identify each move it makes and where in the text each move happens.',
+      correctMove:'mixed',
+      hint:'Paragraph 1 reframes constraints (from limitation to generative force). The final line clarifies the practical implication — compresses the insight into its actionable form. Both moves present, both earning their place.'
+    },
+    {
+      type:'VISUAL CONTENT // EDGE CASE',
+      content:`<p>A timeline showing the history of the internet from 1969 to 2024. Key events are marked: ARPANET (1969), World Wide Web (1991), Google (1998), Facebook (2004), iPhone (2007), GPT-3 (2020). The timeline is linear. Events are evenly spaced. No groupings, no acceleration shown, no visual encoding of significance.</p>`,
+      prompt:'This is a borderline case. Make the argument for why it clarifies — then make the argument for why it\'s noise. Which case is stronger and why?',
+      correctMove:'noise',
+      hint:'It organizes chronology — which is a form of clarification — but the even spacing actively conceals the acceleration pattern that is the most important thing about this timeline. The visual form works against the insight rather than toward it.'
+    },
+    {
+      type:'WRITTEN CONTENT // HARDEST CASE',
+      content:`<p>The concept of "work-life balance" assumes work and life are two separate things that need balancing. But for most people doing meaningful work, this is the wrong frame — work is a dimension of life, not a competitor to it. The question isn't how to balance them. It's how to ensure the work dimension doesn't expand at the expense of the others: rest, relationship, play, reflection.</p>`,
+      prompt:'Identify the move and then stress-test your answer: could someone argue this is noise? What would that argument be, and why does it fail (or succeed)?',
+      correctMove:'reframe',
+      hint:'Classic reframe — the "balance" metaphor is replaced with a "dimensions of life" metaphor that changes what solutions look like. The noise argument (this is just semantics) fails because the frame change has practical consequences: you stop trying to separate work from life and start managing ratios within life.'
+    }
+  ]
+};
+
+function setDiff(d) {
+  difficulty = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('diffLabel').textContent = d.charAt(0).toUpperCase() + d.slice(1).replace('edge','Edge Cases');
+  restartSession();
+}
+
+function buildProgressDots() {
+  const container = document.getElementById('progressDots');
+  container.innerHTML = '';
+  for(let i = 0; i < ROUNDS_PER_SESSION; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'prog-dot' + (i < currentRound ? ' done' : i === currentRound ? ' current' : '');
+    container.appendChild(dot);
+  }
+  const label = document.createElement('div');
+  label.className = 'prog-label';
+  label.textContent = `${currentRound} / ${ROUNDS_PER_SESSION}`;
+  container.appendChild(label);
+}
+
+function getSessionScenarios() {
+  const pool = scenarios[difficulty];
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, ROUNDS_PER_SESSION);
+}
+
+function loadScenario() {
+  const s = sessionScenarios[currentRound];
+  document.getElementById('scenarioType').textContent = s.type;
+  document.getElementById('scenarioContent').innerHTML = s.content;
+  document.getElementById('scenarioPrompt').textContent = s.prompt;
+  document.getElementById('responseInput').value = '';
+  document.getElementById('diagnosisFrame').classList.remove('show');
+  document.getElementById('nextRow').style.display = 'none';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('roundNum').textContent = currentRound + 1;
+  buildProgressDots();
+  updateTopBar();
+}
+
+async function submitResponse() {
+  const userResponse = document.getElementById('responseInput').value.trim();
+  if(!userResponse) { document.getElementById('responseInput').focus(); return; }
+
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('thinkingIndicator').style.display = 'block';
+  document.getElementById('diagnosisFrame').classList.remove('show');
+
+  const s = sessionScenarios[currentRound];
+
+  const systemPrompt = `You are Claude, the diagnostic engine inside the Gravificer Signal Trainer. Your role is to give sharp, honest, useful feedback on a learner's ability to identify whether a piece of content is Clarifying, Revealing, Reframing — or just Noise (adding volume without transformation).
+
+The three moves:
+- CLARIFY: Compresses complexity to essential structure. The reader can now hold something they couldn't before.
+- REVEAL: Makes visible something that existed but had no form — a pattern, tension, or relationship that was present but unnamed.
+- REFRAME: Shifts the frame around the same facts. The reader now sees the same material as a different kind of problem or opportunity.
+- NOISE: Accurate, organized, even polished — but no transformation. The reader gets what they already had access to, reorganized.
+
+Your feedback must:
+1. Open with a VERDICT line: "SIGNAL: [CLARIFY / REVEAL / REFRAME / NOISE / MIXED]" and one sentence saying what the piece is actually doing (or not doing).
+2. Assess the learner's read — be specific about what they got right, what they missed, what they over- or under-identified.
+3. Point to the specific evidence in the content that makes the move visible (or invisible).
+4. Close with one actionable sharpening note — a specific thing to look for in the next scenario.
+5. Keep your tone like a sharp creative practitioner talking to someone who can handle directness. No fluff, no praise inflation. Short paragraphs. No bullet lists.
+6. Total length: 180-240 words. Dense and useful, not exhaustive.
+
+The correct move for this scenario is: ${s.correctMove.toUpperCase()}
+The hint for your reference: ${s.hint}`;
+
+  const userMessage = `SCENARIO TYPE: ${s.type}
+
+CONTENT: ${s.content.replace(/<[^>]*>/g,'')}
+
+LEARNER'S READ: ${userResponse}
+
+Diagnose their signal perception.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system: systemPrompt,
+        messages:[{role:'user',content:userMessage}]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'No response received.';
+
+    const verdictMatch = text.match(/SIGNAL:\s*\[?([A-Z /]+)\]?/i);
+    const verdict = verdictMatch ? verdictMatch[1].trim() : s.correctMove.toUpperCase();
+
+    let verdictClass = 'verdict-mixed';
+    if(verdict.includes('CLARIF')) verdictClass = 'verdict-clarify';
+    else if(verdict.includes('REVEAL')) verdictClass = 'verdict-reveal';
+    else if(verdict.includes('REFRAM')) verdictClass = 'verdict-reframe';
+    else if(verdict.includes('NOISE')) verdictClass = 'verdict-noise';
+
+    const correct = s.correctMove === 'noise'
+      ? (userResponse.toLowerCase().includes('noise') || userResponse.toLowerCase().includes('not') || userResponse.toLowerCase().includes('adding') || userResponse.toLowerCase().includes('relay'))
+      : userResponse.toLowerCase().includes(s.correctMove);
+
+    if(correct) score++;
+    document.getElementById('scoreDisplay').textContent = score;
+
+    const diagBody = document.getElementById('diagnosisBody');
+    diagBody.innerHTML = `
+      <div class="diagnosis-verdict ${verdictClass}">
+        <div class="verdict-icon">◈</div>
+        <div>${text.split('\n')[0]}</div>
+      </div>
+      <div>${text.split('\n').slice(1).join('<br>').replace(/\n\n/g,'</p><p>').replace(/^/,'<p>').replace(/$/,'</p>')}</div>
+    `;
+
+    document.getElementById('diagnosisFrame').classList.add('show');
+    sessionHistory.push({scenario:s, userResponse, verdict, correct});
+
+    document.getElementById('nextRow').style.display = 'block';
+    document.getElementById('thinkingIndicator').style.display = 'none';
+
+    diagBody.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  } catch(err) {
+    document.getElementById('thinkingIndicator').style.display = 'none';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('diagnosisFrame').classList.add('show');
+    document.getElementById('diagnosisBody').innerHTML = '<p style="color:var(--magenta);font-family:var(--font-mono);font-size:12px">// SIGNAL DISRUPTED — check connection and retry</p>';
+  }
+}
+
+async function nextScenario() {
+  currentRound++;
+  if(currentRound >= ROUNDS_PER_SESSION) {
+    await showSessionComplete();
+    return;
+  }
+  document.getElementById('nextRow').style.display = 'none';
+  loadScenario();
+  document.getElementById('scenarioFrame').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+async function showSessionComplete() {
+  document.getElementById('scenarioArea').style.display = 'none';
+  const complete = document.getElementById('sessionComplete');
+  complete.classList.add('show');
+
+  const pct = Math.round((score / ROUNDS_PER_SESSION) * 100);
+  let level = pct >= 75 ? 'Sharp signal' : pct >= 50 ? 'Developing perception' : 'Early calibration';
+
+  const summaryEl = document.getElementById('completeSummary');
+  summaryEl.textContent = `${level} — ${score} of ${ROUNDS_PER_SESSION} reads landed. Generating your session insight...`;
+
+  buildProgressDots();
+  updateTopBar();
+
+  const historyText = sessionHistory.map((h,i) =>
+    `Scenario ${i+1} (${h.scenario.correctMove}): Learner said "${h.userResponse.substring(0,80)}..." — Correct: ${h.correct}`
+  ).join('\n');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are the Gravificer Signal Trainer session analyst. Write a short, sharp session debrief (100-130 words) for a learner who just completed a 4-scenario training session on the Clarify/Reveal/Reframe skill. Focus on: what their perception is doing well, where it's missing the signal, and one specific thing to watch for next session. Write in second person, Gravificer voice — direct, no fluff, no bullet lists. Don't start with "You".`,
+        messages:[{role:'user', content:`Score: ${score}/${ROUNDS_PER_SESSION} (${difficulty} difficulty)\n\nSession history:\n${historyText}`}]
+      })
+    });
+    const data = await res.json();
+    summaryEl.textContent = data.content?.[0]?.text || summaryEl.textContent;
+  } catch(e) {
+    summaryEl.textContent = `${level} — ${score} of ${ROUNDS_PER_SESSION} reads connected. Return for another session to sharpen the signal.`;
+  }
+}
+
+function restartSession() {
+  currentRound = 0;
+  score = 0;
+  sessionHistory = [];
+  sessionScenarios = getSessionScenarios();
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('sessionComplete').classList.remove('show');
+  document.getElementById('scenarioArea').style.display = 'block';
+  document.getElementById('roundTotal').textContent = ROUNDS_PER_SESSION;
+  loadScenario();
+}
+
+function updateTopBar() {
+  const pct = Math.round((currentRound / ROUNDS_PER_SESSION) * 100);
+  document.getElementById('topFill').style.width = pct + '%';
+}
+
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  if(currentRound === 0 && score === 0) {
+    document.getElementById('topFill').style.width = Math.round((scrolled/total)*50)+'%';
+  }
+});
+
+restartSession();
+</script>
+</body>
+</html>
