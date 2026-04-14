@@ -487,7 +487,7 @@ LEARNER'S READ: ${userResponse}
 Diagnose their signal perception.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://gravificer-proxy.mvphillips.workers.dev/', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -572,7 +572,7 @@ async function showSessionComplete() {
   ).join('\n');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://gravificer-proxy.mvphillips.workers.dev/', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
