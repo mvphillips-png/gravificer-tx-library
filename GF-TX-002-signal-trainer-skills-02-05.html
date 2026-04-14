@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GF-TX-002 — Signal Trainer // Skills 02–05 // Gravificer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#04060a;--bg2:#07080f;--bg3:#0a0c16;
+  --cyan:#00fff7;--magenta:#ff003c;--amber:#ffe600;--green:#39ff14;
+  --violet:#9b6dff;--pink:#ff4daa;
+  --text:#d0d8f0;--text-dim:#6070a0;--text-muted:#35405a;
+  --border:rgba(155,109,255,0.15);--border-hot:rgba(155,109,255,0.4);
+  --grad-btn:linear-gradient(90deg,#9b6dff,#ff4daa);
+  --proxy:https://gravificer-proxy.mvphillips.workers.dev/;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:400;line-height:1.75;cursor:crosshair;overflow-x:hidden;min-height:100vh}
+::selection{background:rgba(155,109,255,0.3);color:#e8d8ff}
+.atmo{position:fixed;inset:0;pointer-events:none;z-index:0;background:
+  radial-gradient(ellipse 80% 60% at 70% 10%,rgba(80,20,140,0.4) 0%,transparent 70%),
+  radial-gradient(ellipse 60% 50% at 10% 80%,rgba(120,20,80,0.25) 0%,transparent 65%)}
+.grid-overlay{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(155,109,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(155,109,255,0.04) 1px,transparent 1px);
+  background-size:44px 44px}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px)}
+.container{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 2rem}
+.top-bar{position:fixed;top:0;left:0;right:0;height:2px;background:rgba(155,109,255,0.12);z-index:200}
+.top-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));width:0%;transition:width .3s;box-shadow:0 0 10px rgba(155,109,255,0.5)}
+
+/* HEADER */
+header{padding:4.5rem 0 3rem;border-bottom:1px solid var(--border);position:relative}
+.corner-tl,.corner-br{position:absolute;width:20px;height:20px}
+.corner-tl{top:1.5rem;left:0;border-top:1px solid var(--violet);border-left:1px solid var(--violet);opacity:.6}
+.corner-br{bottom:-1px;right:0;border-bottom:1px solid var(--violet);border-right:1px solid var(--violet);opacity:.6}
+.header-sig{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--violet);letter-spacing:.2em;margin-bottom:1.5rem;opacity:.65}
+.header-sig span{animation:blink 1.4s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.wordmark-wrap{position:relative;display:inline-block;margin-bottom:.4rem}
+.wordmark{font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.8rem);font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1;background:linear-gradient(135deg,#c4aaff 0%,#ff80c8 55%,#00fff7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 16px rgba(155,109,255,0.45))}
+.wordmark-ghost{position:absolute;top:0;left:0;font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.8rem);font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1;color:transparent;-webkit-text-stroke:.5px rgba(155,109,255,0.15);animation:ghostShift 6s ease-in-out infinite;pointer-events:none;white-space:nowrap}
+@keyframes ghostShift{0%,100%{transform:translate(0,0);opacity:.4}30%{transform:translate(2px,-1px);opacity:.2}60%{transform:translate(-2px,1px);opacity:.5}}
+.header-tx{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.1em;margin-bottom:1.5rem}
+.header-deck{font-size:.975rem;font-weight:300;color:var(--text);max-width:500px;line-height:1.8}
+
+/* SKILL SELECTOR */
+.skill-selector{padding:2rem 0;border-bottom:1px solid var(--border)}
+.selector-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--violet);letter-spacing:.18em;margin-bottom:1rem;text-shadow:0 0 8px rgba(155,109,255,0.4)}
+.skill-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.skill-tab{border:1px solid rgba(155,109,255,0.2);padding:.85rem .75rem;cursor:crosshair;background:rgba(155,109,255,0.03);backdrop-filter:blur(6px);transition:all .2s;text-align:left}
+.skill-tab:hover{border-color:rgba(155,109,255,0.4);background:rgba(155,109,255,0.07)}
+.skill-tab.active{border-color:var(--violet);background:rgba(155,109,255,0.1)}
+.tab-num{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;margin-bottom:5px}
+.tab-name{font-size:12px;font-weight:500;color:#e0d4ff;line-height:1.3;margin-bottom:3px}
+.tab-type{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em}
+.skill-tab.active .tab-num{text-shadow:0 0 8px}
+.tab-02 .tab-num,.skill-tab.active[data-skill="02"] .tab-num{color:#c4aaff}
+.tab-03 .tab-num,.skill-tab.active[data-skill="03"] .tab-num{color:var(--amber)}
+.tab-04 .tab-num,.skill-tab.active[data-skill="04"] .tab-num{color:var(--green)}
+.tab-05 .tab-num,.skill-tab.active[data-skill="05"] .tab-num{color:var(--magenta)}
+
+/* SKILL INTRO */
+.skill-intro{padding:2rem 0 1.5rem;border-bottom:1px solid var(--border)}
+.skill-meta{display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem}
+.skill-index{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.15em}
+.skill-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.skill-tag{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:4px 12px;border:1px solid}
+.skill-headline{font-family:'Orbitron',sans-serif;font-size:clamp(.95rem,2vw,1.25rem);font-weight:700;color:#e8e0ff;line-height:1.4;margin-bottom:.9rem;letter-spacing:.02em}
+.skill-body{font-size:.9rem;color:var(--text);line-height:1.85;max-width:620px}
+.skill-body p{margin-bottom:.8rem}
+.skill-body p:last-child{margin-bottom:0}
+
+/* CONCEPT GRID — for skill 02 visual diagnostic */
+.concept-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:1.1rem 0}
+.concept-card{padding:.85rem 1rem;border:1px solid;background:rgba(155,109,255,0.03);backdrop-filter:blur(4px)}
+.concept-label{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:5px}
+.concept-def{font-size:11px;color:var(--text-dim);line-height:1.6}
+
+/* TRAINING */
+.training-area{padding:2rem 0}
+.training-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem}
+.training-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--violet);text-shadow:0 0 10px rgba(155,109,255,0.4)}
+.training-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(155,109,255,0.3),transparent)}
+.session-meta{display:flex;gap:1.5rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.session-stat{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.1em}
+.session-stat span{color:var(--violet)}
+.difficulty-row{display:flex;gap:6px;margin-bottom:1.25rem}
+.diff-btn{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;padding:5px 12px;border:1px solid rgba(155,109,255,0.2);background:transparent;color:var(--text-muted);cursor:crosshair;transition:all .15s}
+.diff-btn.active{border-color:var(--violet);color:var(--violet);background:rgba(155,109,255,0.08);text-shadow:0 0 8px rgba(155,109,255,0.5)}
+.progress-dots{display:flex;gap:6px;margin-bottom:1.25rem;align-items:center}
+.prog-dot{width:8px;height:8px;border-radius:50%;border:1px solid rgba(155,109,255,0.3);background:transparent;transition:all .3s}
+.prog-dot.done{background:var(--violet);border-color:var(--violet);box-shadow:0 0 6px var(--violet)}
+.prog-dot.current{background:transparent;border-color:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.prog-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.1em;margin-left:.25rem}
+
+/* SCENARIO */
+.scenario-frame{border:1px solid rgba(155,109,255,0.3);background:rgba(10,8,22,0.6);backdrop-filter:blur(12px);position:relative;margin-bottom:1rem;box-shadow:0 0 40px rgba(155,109,255,0.08)}
+.scenario-frame::before{content:'SCENARIO';position:absolute;top:-9px;left:1.5rem;background:var(--bg);padding:0 .6rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--violet);letter-spacing:.2em;text-shadow:0 0 8px rgba(155,109,255,0.5)}
+.scenario-body{padding:1.5rem}
+.scenario-type{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.75rem}
+.scenario-content{font-size:.95rem;color:var(--text);line-height:1.85;margin-bottom:1.25rem}
+.scenario-content p{margin-bottom:.8rem}
+.scenario-content p:last-child{margin-bottom:0}
+.scenario-prompt{font-family:'Orbitron',sans-serif;font-size:.82rem;font-weight:700;color:#e0d4ff;letter-spacing:.03em;padding:.9rem 1.1rem;border:1px solid rgba(155,109,255,0.25);background:rgba(155,109,255,0.06);line-height:1.45}
+
+/* RESPONSE */
+.response-section{margin-bottom:1rem}
+.response-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.response-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.response-input{width:100%;background:rgba(155,109,255,0.04);border:1px solid rgba(155,109,255,0.2);color:var(--text);font-family:'Exo 2',sans-serif;font-size:.9rem;line-height:1.7;padding:.9rem 1.1rem;resize:vertical;min-height:110px;cursor:crosshair;transition:border-color .2s}
+.response-input:focus{outline:none;border-color:rgba(155,109,255,0.5);background:rgba(155,109,255,0.06)}
+.response-input::placeholder{color:var(--text-muted);font-style:italic}
+.submit-row{display:flex;gap:.75rem;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.btn-submit{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:.8rem 1.6rem;border:none;background:var(--grad-btn);color:#fff;cursor:crosshair;transition:all .25s;box-shadow:0 0 20px rgba(155,109,255,0.35)}
+.btn-submit:hover{box-shadow:0 0 32px rgba(155,109,255,0.55);transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-next{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:.8rem 1.4rem;border:1px solid rgba(155,109,255,0.3);background:transparent;color:var(--text-dim);cursor:crosshair;transition:all .2s}
+.btn-next:hover{border-color:rgba(155,109,255,0.5);color:var(--text)}
+.thinking-indicator{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--violet);letter-spacing:.1em;display:none;animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* DIAGNOSIS */
+.diagnosis-frame{border:1px solid rgba(57,255,20,0.25);background:rgba(10,18,10,0.7);backdrop-filter:blur(10px);position:relative;margin-bottom:1.5rem;display:none}
+.diagnosis-frame.show{display:block}
+.diagnosis-frame::before{content:'SIGNAL DIAGNOSIS';position:absolute;top:-9px;left:1.5rem;background:var(--bg);padding:0 .6rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);letter-spacing:.2em;text-shadow:0 0 8px rgba(57,255,20,0.4)}
+.diagnosis-body{padding:1.5rem;font-size:.9rem;color:var(--text);line-height:1.85}
+.diagnosis-body p{margin-bottom:.85rem}
+.diagnosis-body p:last-child{margin-bottom:0}
+.diagnosis-verdict{display:flex;gap:.75rem;align-items:flex-start;padding:.85rem 1rem;border:1px solid;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.06em;line-height:1.5}
+.verdict-art    {border-color:rgba(196,170,255,0.4);background:rgba(155,109,255,0.08);color:#c4aaff}
+.verdict-energy {border-color:rgba(255,230,0,0.3);background:rgba(255,230,0,0.05);color:var(--amber)}
+.verdict-know   {border-color:rgba(57,255,20,0.3);background:rgba(57,255,20,0.05);color:var(--green)}
+.verdict-pattern{border-color:rgba(255,0,60,0.3);background:rgba(255,0,60,0.05);color:var(--magenta)}
+.verdict-strong {border-color:rgba(57,255,20,0.4);background:rgba(57,255,20,0.06);color:var(--green)}
+.verdict-partial{border-color:rgba(255,230,0,0.3);background:rgba(255,230,0,0.05);color:var(--amber)}
+.verdict-miss   {border-color:rgba(255,77,170,0.3);background:rgba(255,77,170,0.05);color:var(--pink)}
+.verdict-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* COMPLETE */
+.session-complete{border:1px solid rgba(155,109,255,0.3);background:rgba(10,8,22,0.7);backdrop-filter:blur(12px);padding:2rem;text-align:center;display:none}
+.session-complete.show{display:block}
+.complete-mark{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(155,109,255,0.2),rgba(255,77,170,0.2));border:1px solid rgba(155,109,255,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+.complete-title{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:#e0d4ff;margin-bottom:.75rem;letter-spacing:.03em}
+.complete-sub{font-size:.9rem;color:var(--text-dim);line-height:1.7;margin-bottom:1.5rem;max-width:420px;margin-left:auto;margin-right:auto}
+.complete-actions{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+
+/* LOADING */
+.loading-msg{display:none;padding:2rem 0;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--violet);letter-spacing:.1em;animation:pulse .8s ease-in-out infinite}
+
+footer{border-top:1px solid var(--border);padding:1.5rem 0 3rem;margin-top:3rem}
+.footer-sig{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em}
+
+@media(max-width:600px){
+  .container{padding:0 1.25rem}
+  header{padding:3.5rem 0 2.5rem}
+  .skill-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .concept-row{grid-template-columns:1fr}
+  .complete-actions{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+<div class="atmo"></div>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+<div class="top-bar"><div class="top-bar-fill" id="topFill"></div></div>
+
+<div class="container">
+<header>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="header-sig">GF-TX-002 // SIGNAL TRAINER // GRAVIFICER.SYS // <span>▊</span></div>
+  <div class="wordmark-wrap">
+    <div class="wordmark">GRAVIFICER</div>
+    <div class="wordmark-ghost">GRAVIFICER</div>
+  </div>
+  <div class="header-tx">// SIGNAL TRAINER — SKILLS 02–05</div>
+  <p class="header-deck">Four more perceptual tools. Each one sharpens a different dimension of the Gravificer system. Select a skill and run a session.</p>
+</header>
+
+<div class="skill-selector">
+  <div class="selector-label">SELECT SKILL</div>
+  <div class="skill-tabs">
+    <button class="skill-tab tab-02 active" data-skill="02" onclick="selectSkill('02')">
+      <div class="tab-num">SKILL 02</div>
+      <div class="tab-name">Visual work diagnosis</div>
+      <div class="tab-type">Perceptual</div>
+    </button>
+    <button class="skill-tab tab-03" data-skill="03" onclick="selectSkill('03')">
+      <div class="tab-num">SKILL 03</div>
+      <div class="tab-name">Energy mapping</div>
+      <div class="tab-type">Structural</div>
+    </button>
+    <button class="skill-tab tab-04" data-skill="04" onclick="selectSkill('04')">
+      <div class="tab-num">SKILL 04</div>
+      <div class="tab-name">The forge test</div>
+      <div class="tab-type">Transformational</div>
+    </button>
+    <button class="skill-tab tab-05" data-skill="05" onclick="selectSkill('05')">
+      <div class="tab-num">SKILL 05</div>
+      <div class="tab-name">Pattern naming</div>
+      <div class="tab-type">Recognition</div>
+    </button>
+  </div>
+</div>
+
+<div id="skillIntroArea"></div>
+<div id="trainingArea" class="training-area"></div>
+
+<footer>
+  <div class="footer-sig">GF-TX-002 — SIGNAL TRAINER SKILLS 02–05 // GRAVIFICER // MVANNP // POWERED BY CLAUDE — ANTHROPIC</div>
+</footer>
+</div>
+
+<script>
+const PROXY = 'https://gravificer-proxy.mvphillips.workers.dev/';
+const ROUNDS = 4;
+
+const skills = {
+  '02': {
+    index:'SKILL 02 // PERCEPTUAL',
+    tag:'Visual Logic',
+    tagColor:'rgba(196,170,255,0.4)',
+    tagTextColor:'#c4aaff',
+    headline:'Is the visual form doing cognitive work —<br>or just making the piece look considered?',
+    body:`<p>There's a difference between design that communicates and design that decorates. Both can look polished. Both can look intentional. The difference is whether the visual decisions are doing actual cognitive work — making a relationship visible, sequencing understanding, encoding meaning into form — or whether they're just making the piece feel more credible without adding anything the text doesn't already carry.</p><p>In this skill you'll examine design decisions and visual presentations. Your job: identify whether the visual form is earning its place or coasting on aesthetics.</p>`,
+    concepts:[
+      {label:'Cognitive work',color:'rgba(196,170,255,0.3)',text:'The visual makes something understandable that text alone couldn\'t — a relationship, a hierarchy, a scale, a sequence.'},
+      {label:'Decoration',color:'rgba(155,109,255,0.15)',text:'The visual makes the piece feel more credible or polished but carries no information the text doesn\'t already provide.'},
+      {label:'The test',color:'rgba(0,255,247,0.1)',text:'Remove the visual. If the reader loses understanding — not just visual appeal — the visual was doing cognitive work.'}
+    ],
+    verdictClass:'verdict-art',
+    systemPrompt: `You are the Gravificer Signal Trainer diagnostic engine for Skill 02: Visual Logic Diagnosis. The learner is developing the ability to distinguish visual design that does cognitive work from design that merely decorates.
+
+COGNITIVE WORK: The visual form makes something understandable that text couldn't — it encodes a relationship, hierarchy, scale, sequence, or tension into perceivable form. Remove it and understanding is lost, not just visual appeal.
+DECORATION: The visual makes the piece look more credible or polished but carries no information beyond what the text already provides. Remove it and nothing is understood differently.
+MIXED: Some elements earn their place, others don't.
+
+Your diagnosis must:
+1. Open with VERDICT: [COGNITIVE WORK / DECORATION / MIXED] — one sentence describing what the visual is doing (or not doing).
+2. Test the learner's read specifically — what they saw correctly, what they missed, where their perception is sharp or blunt.
+3. Point to the specific visual elements that are or aren't earning their place.
+4. Close with one sharpening note for their next scenario.
+5. Gravificer voice — direct, practitioner-to-practitioner, no fluff. 180-220 words. No bullet lists.`,
+    scenarios: {
+      standard:[
+        {type:'VISUAL DESIGN // INFOGRAPHIC',content:`<p>An infographic about climate change shows a large thermometer graphic with the mercury rising. The temperature reading is shown in red text at the top. A paragraph of text below the thermometer explains that global temperatures have risen 1.1°C since pre-industrial times and describes the effects on weather patterns, sea levels, and ecosystems.</p>`,prompt:'Is the thermometer visual doing cognitive work — or is it decorating information the text already carries?',correct:'decoration',hint:'The thermometer tells you it\'s about temperature (which the headline already does) and that it\'s rising (which the text explains). It adds visual familiarity but no understanding the text doesn\'t provide.'},
+        {type:'VISUAL DESIGN // DATA VISUALIZATION',content:`<p>A scatter plot showing the relationship between a country's GDP per capita and its average life expectancy. Each dot represents a country. Dot size represents population. Colour represents continent. The chart shows a clear curve: as GDP rises, life expectancy rises steeply at first, then levels off. Outliers are labeled — Cuba sits far above the curve, the US far below.</p>`,prompt:'Is this visualization doing cognitive work or decorating data that could have been described in text?',correct:'cognitive',hint:'The scatter plot reveals a non-linear relationship and shows outliers in a way text cannot — you can see the shape of the curve, the clustering by continent, and where individual countries sit relative to expectation. This is irreplaceable visual logic.'},
+        {type:'VISUAL DESIGN // PRESENTATION SLIDE',content:`<p>A presentation slide with the headline "Our Three Core Values" in large Orbitron font. Below it, three icons: a lightbulb (Innovation), a handshake (Collaboration), a shield (Integrity). Each icon has a one-sentence description beneath it. The background is a dark gradient with subtle geometric pattern. The typography is bold and the color palette is consistent with the brand.</p>`,prompt:'Are the icons doing cognitive work — or are they decorating a list that would communicate identically as plain text?',correct:'decoration',hint:'The lightbulb, handshake, and shield are universal shorthand — they confirm what the words already say. Remove them and the reader loses nothing. The visual treatment makes it look designed, not think differently.'},
+        {type:'VISUAL DESIGN // DIAGRAM',content:`<p>A diagram showing the water cycle. Arrows show water evaporating from the ocean, forming clouds, precipitating as rain, collecting in rivers, and flowing back to the ocean. Each stage is labeled. The arrows encode direction of flow. The spatial arrangement shows altitude — evaporation rises, precipitation falls, rivers flow downhill.</p>`,prompt:'Is the spatial arrangement doing cognitive work here, or could this be replaced with a numbered list?',correct:'cognitive',hint:'The spatial arrangement encodes altitude, direction, and the cyclical nature of the process simultaneously. A numbered list would require the reader to mentally construct the spatial model the diagram provides directly.'}
+      ],
+      advanced:[
+        {type:'VISUAL DESIGN // BRAND IDENTITY',content:`<p>A law firm's rebrand. The new logo uses a modified serif typeface with slightly extended letterforms. The color palette shifts from navy-and-gold to deep charcoal and warm white. The website redesign uses generous whitespace, large photography of the city skyline, and a minimal navigation. The firm's practice areas are displayed as large typographic headers with short descriptors.</p>`,prompt:'Diagnose the visual system as a whole: what cognitive work is it doing, and where is it decorating?',correct:'mixed',hint:'The generous whitespace and minimal navigation do cognitive work — they signal expertise by removing noise, encoding "we don\'t need to oversell." The city photography decorates — it\'s generic prestige. The typographic practice areas do light cognitive work by using scale to encode importance.'},
+        {type:'VISUAL DESIGN // DATA DASHBOARD',content:`<p>A marketing analytics dashboard. The top row shows four metric cards: Sessions, Conversion Rate, Revenue, Bounce Rate — each with a number and a small sparkline showing 30-day trend. Below, a bar chart shows sessions by channel. A pie chart shows revenue by product category. A map shows traffic by geography. All charts use the same brand blue color palette.</p>`,prompt:'Which visual elements are doing cognitive work and which are decorating? Be specific about each.',correct:'mixed',hint:'Sparklines do real cognitive work — trend in 30 days in 40px. The bar chart by channel is useful. The pie chart for revenue categories is likely decoration — bar charts show proportions more accurately. The map may be decoration if geography isn\'t actionable. Single-color palette throughout loses categorical encoding.'}
+      ],
+      edge:[
+        {type:'VISUAL DESIGN // EDGE CASE',content:`<p>A book cover for a history of the internet. The design shows a single image: an aerial photograph of a data center at night, lit from within, surrounded by darkness. The title is in small, plain white text at the bottom. No other design elements. No subtitle visible on the cover itself.</p>`,prompt:'Make the strongest case that this is doing cognitive work. Then make the strongest case it\'s decoration. Which argument wins?',correct:'cognitive',hint:'Cognitive work case: the data center at night encodes scale, infrastructure, and the invisible physical reality of the internet — it reframes the subject before the reader opens the book. Decoration case: any evocative image could occupy this space. The cognitive work case is stronger — the specific choice of data center (not a computer, not code, not a network diagram) is a conceptual argument about what the internet actually is.'}
+      ]
+    }
+  },
+
+  '03': {
+    index:'SKILL 03 // STRUCTURAL',
+    tag:'Energy Diagnosis',
+    tagColor:'rgba(255,230,0,0.35)',
+    tagTextColor:'var(--amber)',
+    headline:'Where does the energy drop?<br>What am I holding onto that costs more than it gives?',
+    body:`<p>A piece of work can be technically complete and experientially inert. The words are right. The information is accurate. And something is costing more attention than it returns — a warm-up section, over-evidenced claims, a paragraph where the writer was figuring the idea out rather than transmitting it.</p><p>In this skill you'll read passages and identify the exact structural moment where forward momentum collapses. Not tone — structure. The causes are almost always one of three things: late entry (the piece warms up before arriving), over-evidence (more proof than the claim requires), or attachment (the writer kept something that served them, not the reader).</p>`,
+    concepts:[
+      {label:'Late entry',color:'rgba(255,230,0,0.15)',text:'The piece arrives at its actual point after warming up. Everything before the real opening costs attention without earning it.'},
+      {label:'Over-evidence',color:'rgba(255,230,0,0.12)',text:'More support than the claim needs. After the third example, the reader already believes you — more examples slow momentum.'},
+      {label:'Attachment',color:'rgba(255,230,0,0.1)',text:'A section that served the writer (where they figured it out) but not the reader (who doesn\'t need to watch you figure it out).'}
+    ],
+    verdictClass:'verdict-energy',
+    systemPrompt:`You are the Gravificer Signal Trainer diagnostic engine for Skill 03: Energy Mapping. The learner is developing the ability to identify exactly where structural momentum collapses in a piece of work.
+
+Three energy collapse patterns:
+LATE ENTRY: The piece opens with warm-up before arriving at its actual point. Cut everything before the real opening.
+OVER-EVIDENCE: More support than the claim needs. After sufficient proof, additional examples slow momentum.
+ATTACHMENT: A section the writer needed to figure the idea out but the reader doesn't need to watch them figure it out.
+
+Your diagnosis must:
+1. Open with VERDICT: [LATE ENTRY / OVER-EVIDENCE / ATTACHMENT / MULTIPLE] — identify the specific collapse point by location ("The third paragraph", "The opening two sentences", "The section starting with 'Furthermore'").
+2. Assess the learner's read — did they find the right location? Did they correctly identify the cause?
+3. Show exactly what the energy cost is — what is the reader experiencing at the collapse point?
+4. Give a specific edit: what would you cut or move?
+5. One sharpening note. Gravificer voice. 180-220 words. No bullet lists.`,
+    scenarios: {
+      standard:[
+        {type:'WRITTEN CONTENT // BLOG OPENING',content:`<p>Social media has fundamentally changed the way we communicate and share information in the modern world. Platforms like Instagram, Twitter, LinkedIn, and TikTok have transformed how businesses, creators, and individuals connect with their audiences. As someone who has worked in digital marketing for over a decade, I've seen firsthand how these platforms have evolved.</p><p>But here's what most people miss: the algorithm doesn't reward content — it rewards attention retention. Every platform measures how long people stay, not how much they like what they see.</p>`,prompt:'Where does the energy drop in this piece, and what is causing it?',correct:'late_entry',hint:'The first paragraph is a warm-up — three sentences of context the reader already has. The real piece starts at "But here\'s what most people miss." Everything before that sentence costs attention without returning it.'},
+        {type:'WRITTEN CONTENT // ARGUMENT',content:`<p>Pattern recognition is the most transferable skill you can develop. A musician who understands harmonic structure can learn a new song faster. A chess player who recognizes endgame patterns makes fewer moves to win. A designer who sees compositional patterns applies them across mediums. A writer who studies sentence rhythm transfers it to their pacing. A runner who understands effort distribution applies it to any distance. The skill isn't domain-specific — it's a way of seeing that moves anywhere you point it.</p>`,prompt:'Where does the energy drop, and what structural cause is producing it?',correct:'over_evidence',hint:'The claim lands by the second or third example. By the fifth example (the runner) the reader already believes the point and is waiting for what comes next. The piece over-evidences — it keeps proving what\'s already proven.'},
+        {type:'WRITTEN CONTENT // ESSAY SECTION',content:`<p>I first started thinking about this problem three years ago when I was working on a client project that kept failing in ways I couldn't explain. We were doing everything right — the research was solid, the strategy was clear, the execution was clean. But the work wasn't landing. I spent weeks trying to diagnose what was wrong before I realized the issue wasn't the work itself. It was that we had confused completion with transmission.</p><p>Completion is finishing the thing. Transmission is the thing arriving.</p>`,prompt:'Identify the energy structure of this passage. Where is the momentum and where does it cost?',correct:'attachment',hint:'The first paragraph is the writer\'s private diagnostic journey — three sentences of "I was confused before I figured it out." That confusion served the writer, not the reader. The piece earns its energy at "Completion is finishing the thing." Everything before is attachment.'}
+      ],
+      advanced:[
+        {type:'WRITTEN CONTENT // COMPLEX PASSAGE',content:`<p>The most important lesson I learned from competitive running wasn't about fitness. It wasn't about discipline, or pain tolerance, or even the mental game — though all of those matter. It was about the difference between effort and output.</p><p>In training, you can increase effort indefinitely. You can always push harder, log more miles, reduce rest. But output — actual performance — doesn't scale linearly with effort. At some point, more effort produces less output. The body adapts, then plateaus, then regresses.</p><p>This is true in creative work too. More hours, more revisions, more research — past a certain point, they cost more than they return. The skill isn't adding more. It's knowing exactly when you've reached enough.</p>`,prompt:'This passage has structural energy. Identify where it\'s strongest and whether there\'s any cost — any place where the momentum slows unnecessarily.',correct:'late_entry',hint:'The opening two sentences are soft — "wasn\'t about fitness... wasn\'t about discipline" is a negative-definition warm-up. The piece actually starts at "the difference between effort and output." The negative framing builds mild anticipation but costs against the directness of what follows. Minor cost, notable structure.'},
+        {type:'WRITTEN CONTENT // PITCH OPENING',content:`<p>Gravificer is a creative philosophy built around four pillars: Art, Energy, Knowledge, and Patterns. I developed it over 30 years of working as a visual communication specialist. The system grew out of a consistent frustration — watching technically excellent work fail to land. Good work that didn't transmit.</p><p>The problem isn't quality. The problem is that quality, without signal, is invisible. Gravificer is a set of questions I ask before anything leaves my desk — questions that force every output to clarify, reveal, or reframe something. Otherwise it doesn't ship.</p>`,prompt:'Map the energy of this pitch. Where is it strongest? Is there any structural cost, or is every element earning its place?',correct:'over_evidence',hint:'The first paragraph front-loads credentials and context before arriving at the real signal. "I developed it over 30 years" and "The system grew out of" are credentialing — they cost against the directness of "Good work that didn\'t transmit." That five-word sentence is where the pitch actually starts.'}
+      ],
+      edge:[
+        {type:'WRITTEN CONTENT // EDGE CASE',content:`<p>Everything I know about creativity I learned from watching athletes fail.</p><p>Not the dramatic failures — the quiet ones. The runner who trains perfectly for six months and runs slower than last year. The swimmer whose stroke gets technically cleaner and measurably worse. The cyclist who does everything right and can't find the power that was there before.</p><p>These failures share a structure. The athlete optimized for the measurable thing and lost the unmeasurable thing. The unmeasurable thing was doing more of the work.</p>`,prompt:'This piece has strong energy throughout. Your job is harder here: find any place — even subtle — where something costs more than it returns, or argue that every element is earning its place.',correct:'strong',hint:'Strong case: the piece enters at consequence, every sentence advances. The three athlete examples are necessary — each adds a different domain (running, swimming, cycling) and each lands the "quiet failure" before the diagnosis. The paragraph of three examples isn\'t over-evidence because the reader needs all three to feel the pattern before it\'s named. Every element earns its place.'}
+      ]
+    }
+  },
+
+  '04': {
+    index:'SKILL 04 // TRANSFORMATIONAL',
+    tag:'The Forge Test',
+    tagColor:'rgba(57,255,20,0.3)',
+    tagTextColor:'var(--green)',
+    headline:'What does this make possible<br>that didn\'t exist before?',
+    body:`<p>This is the hardest question in the Gravificer system — and the most important. It's the difference between knowledge in use and knowledge in storage. A relay takes information and moves it forward, unchanged. A transmission takes information, puts it through something, and produces a new object the source material couldn't be on its own.</p><p>In this skill you'll be shown a piece of raw material — a research finding, a data point, an observation — and a piece of work produced from it. Your job: determine whether the work is a relay or a transmission. Has the forge run? Is there something here that couldn't exist without this specific mind processing this specific material?</p>`,
+    concepts:[
+      {label:'The relay',color:'rgba(57,255,20,0.08)',text:'Accurate, organized, possibly even well-written. But the reader could have gotten the same thing from the source. The forge hasn\'t run.'},
+      {label:'The transmission',color:'rgba(57,255,20,0.12)',text:'The output contains something the source material couldn\'t produce on its own. A new form, a revealed pattern, a reframe that changes what the information means.'},
+      {label:'The test',color:'rgba(0,255,247,0.08)',text:'Could someone have gotten this from reading the original source? If yes — it\'s a relay. The transformation hasn\'t happened yet.'}
+    ],
+    verdictClass:'verdict-know',
+    systemPrompt:`You are the Gravificer Signal Trainer diagnostic engine for Skill 04: The Forge Test. The learner is developing the ability to distinguish a relay (information moved forward, unchanged) from a transmission (information transformed into something the source couldn't be on its own).
+
+RELAY: The reader could have gotten the same thing from the source. Clean, accurate, organized — but not transformed.
+TRANSMISSION: The output contains something the source material couldn't produce. A new form, a revealed pattern, a reframe, an insight only possible after processing.
+PARTIAL: The transformation started but didn't complete. Some new object is emerging but the relay instinct is still visible.
+
+Your diagnosis must:
+1. Open with VERDICT: [RELAY / TRANSMISSION / PARTIAL] — one sentence identifying what the forge produced (or didn't).
+2. Test the learner's read specifically — did they correctly identify the transformation or its absence?
+3. Identify the exact moment where transformation happens (or where it stops).
+4. The test: what does this output contain that the source couldn't? Or: what's still relay that should be forge?
+5. One sharpening note. Gravificer voice. 180-220 words. No bullet lists.`,
+    scenarios: {
+      standard:[
+        {type:'SOURCE + OUTPUT // SPORTS SCIENCE',content:`<p><strong>Source material:</strong> Research finding — Athletes who train at perceived effort levels of 7-8/10 show better long-term performance adaptation than those who consistently train at 9-10/10 intensity.</p><p><strong>Output produced from it:</strong> "New research suggests that moderate-high intensity training (RPE 7-8) produces better long-term performance outcomes than maximum intensity training (RPE 9-10). Athletes and coaches should consider incorporating more moderate intensity sessions into their training programs rather than always pushing to maximum effort."</p>`,prompt:'Is this a relay or a transmission? Has the forge run on this research finding?',correct:'relay',hint:'The output is a clean restatement with a practical recommendation appended. The research finding and the output say the same thing in the same frame. A transmission would ask: why does sub-maximal effort produce better adaptation? What does this reveal about how the body actually works? What does it mean for how we think about effort itself?'},
+        {type:'SOURCE + OUTPUT // DESIGN OBSERVATION',content:`<p><strong>Source material:</strong> Observation — Most people, when shown a complex diagram, look at the largest element first, regardless of where it sits on the page.</p><p><strong>Output produced from it:</strong> "Visual hierarchy isn't about importance — it's about inevitability. You don't guide the eye by making things important. You guide it by making certain elements impossible to ignore first. The designer's job isn't to rank information. It's to sequence the encounter."</p>`,prompt:'Is this a relay or a transmission? What, if anything, did the forge produce?',correct:'transmission',hint:'The source observation is about eye movement. The output uses that observation to reframe what visual hierarchy is — from a ranking system to a sequencing system. "The designer\'s job isn\'t to rank information. It\'s to sequence the encounter." That sentence couldn\'t come from the observation alone — it required a mind to process what the observation means for practice.'},
+        {type:'SOURCE + OUTPUT // DATA POINT',content:`<p><strong>Source material:</strong> Statistic — 65% of communication is nonverbal, according to research by Albert Mehrabian.</p><p><strong>Output produced from it:</strong> "Studies show that 65% of communication is nonverbal. This means that body language, facial expressions, and tone of voice carry more meaning than the words we actually say. Effective communicators understand and leverage this by paying attention to how they present themselves, not just what they say."</p>`,prompt:'Has the forge run here? Is this a relay or a transmission?',correct:'relay',hint:'The output restates the statistic and draws the obvious implication. The "65% is nonverbal therefore pay attention to body language" move is available directly from the statistic — no forge required. A transmission might ask: if most of communication bypasses words, what does that mean for written communication specifically? Or: what does it reveal about why some people are believed instantly and others aren\'t, regardless of what they say?'}
+      ],
+      advanced:[
+        {type:'SOURCE + OUTPUT // COMPLEX CASE',content:`<p><strong>Source material:</strong> Observation from running coaching — Runners who struggle most in the final miles of a race are rarely those who went out too fast. More often, they\'re those who spent the entire race running at the edge of control, leaving no reserve for the point where the race actually begins.</p><p><strong>Output produced from it:</strong> "Most creative professionals exhaust themselves in the production phase and have nothing left when the work needs to be made better rather than just made. The race doesn\'t start at the gun. The creative work doesn\'t start at the draft. Pacing isn\'t a metaphor — it\'s the same mechanism operating in a different domain."</p>`,prompt:'Evaluate the forge: what transformation happened, and did it complete?',correct:'transmission',hint:'The running observation becomes a frame for creative practice — not metaphorically but mechanically. "Pacing isn\'t a metaphor — it\'s the same mechanism" is the forge completing. The output contains something the source couldn\'t: a claim about how creative work actually runs, built from the structural logic of race pacing. The transformation is full.'},
+        {type:'SOURCE + OUTPUT // PARTIAL CASE',content:`<p><strong>Source material:</strong> Research finding — People are more likely to remember information presented as a story than as a list of facts, even when the factual content is identical.</p><p><strong>Output produced from it:</strong> "Facts don\'t move people — stories do. This is why every great communicator, from ancient storytellers to modern marketers, leads with narrative rather than data. If you want your ideas to stick, wrap them in story. The research confirms what every experienced communicator already knows: structure matters."</p>`,prompt:'The forge started here but may not have completed. Identify what transformation occurred and where it stopped.',correct:'partial',hint:'The output moves from "stories are remembered better" to "structure matters" — that\'s a slight reframe. But "structure matters" is generic, and "wrap them in story" is the obvious application of the research finding. The forge started (there\'s an attempt at a bigger claim) but stopped before the interesting question: why does story structure create retention? What does that reveal about how meaning is actually constructed?'}
+      ],
+      edge:[
+        {type:'SOURCE + OUTPUT // HARDEST CASE',content:`<p><strong>Source material:</strong> Personal observation — In 30 years of design work, the projects that failed most consistently were not the ones with the worst execution but the ones where the problem was defined too early, before the real problem had surfaced.</p><p><strong>Output produced from it:</strong> "The most expensive mistake in creative work isn\'t bad execution. It\'s premature definition. Every project contains an actual problem and a stated problem. The stated problem is what the client tells you. The actual problem is what you discover if you resist solving the stated problem long enough. Most projects fail at the brief, not the execution — because the brief locked in a solution before the problem had fully appeared."</p>`,prompt:'This is a strong candidate for full transmission. Make the argument for why it is — then identify whether anything in it is still relay, and how strong that remaining relay is.',correct:'transmission',hint:'Transmission case: "stated problem vs actual problem" is a new distinction the observation alone couldn\'t produce. "Fails at the brief, not the execution" reframes where design failure lives — a claim that changes practice. The relay test: the final sentence partly restates the opening. But the "premature definition" framing and the stated/actual distinction are forge outputs — they couldn\'t come from the observation without a mind processing what the observation means at scale.'}
+      ]
+    }
+  },
+
+  '05': {
+    index:'SKILL 05 // RECOGNITION',
+    tag:'Pattern Naming',
+    tagColor:'rgba(255,0,60,0.35)',
+    tagTextColor:'var(--magenta)',
+    headline:'What pattern is operating here<br>that I haven\'t named yet?',
+    body:`<p>Pattern recognition is the only skill in the Gravificer system that sharpens all four pillars simultaneously. When you see a pattern in Art, you find its grammar. In Energy, its rhythm. In Knowledge, its architecture. But the leverage only activates when you name the pattern — not describe it, name it. A named pattern is transferable. An unnamed one stays local.</p><p>In this skill you'll be shown two apparently unrelated examples. Your job: identify the underlying logic they share — not the surface similarity, but the structural mechanism that makes both of them work (or fail) the same way. Then name it. The name should be short enough to carry, precise enough to point at the thing, and transferable enough to apply somewhere neither example comes from.</p>`,
+    concepts:[
+      {label:'Surface similarity',color:'rgba(255,0,60,0.08)',text:'Both involve X. Both use Y. Both are about Z. Surface matching — not pattern recognition.'},
+      {label:'Structural mechanism',color:'rgba(255,0,60,0.12)',text:'The underlying logic that makes both work the same way. The reason behind the resemblance.'},
+      {label:'The transferable name',color:'rgba(255,77,170,0.1)',text:'Short. Precise. Portable. A name that makes the pattern immediately recognizable in a third context.'}
+    ],
+    verdictClass:'verdict-pattern',
+    systemPrompt:`You are the Gravificer Signal Trainer diagnostic engine for Skill 05: Pattern Naming. The learner is developing the ability to identify the structural mechanism shared between apparently unrelated examples — and name it precisely enough to transfer it.
+
+Three levels of pattern recognition:
+SURFACE: "Both involve X" — similarity detected, mechanism not identified.
+STRUCTURAL: The underlying logic identified but not named, or named imprecisely.
+TRANSFERABLE: The pattern named precisely enough that it immediately applies to a third context neither example comes from.
+
+Your diagnosis must:
+1. Open with VERDICT: [SURFACE / STRUCTURAL / TRANSFERABLE] — identify which level the learner's pattern recognition reached.
+2. Name the pattern yourself — the precise, short, transferable name. Compare it to the learner's attempt.
+3. Show where the mechanism operates in each example specifically.
+4. Test transferability: where else does this pattern appear outside the two examples?
+5. One sharpening note. Gravificer voice. 180-220 words. No bullet lists.`,
+    scenarios: {
+      standard:[
+        {type:'PATTERN RECOGNITION // TWO EXAMPLES',content:`<p><strong>Example A:</strong> In distance running, athletes who go out at a controlled pace in the first half of a race consistently outperform those who run at maximum effort early, even when the fast starters feel stronger in the opening miles.</p><p><strong>Example B:</strong> In negotiation, experienced negotiators deliberately slow the pace of early concessions — making small, carefully spaced moves in the first phase — which consistently produces better final outcomes than making large concessions early to build goodwill.</p>`,prompt:'What is the structural pattern these two examples share? Name it precisely enough to apply it somewhere neither example comes from.',correct:'front_loading_cost',hint:'Pattern: "Front-loading cost." When you spend your resource (energy, concessions, goodwill) early at full rate, you deplete what the crucial phase requires. Both running and negotiation punish early maximalism and reward early conservation. Transferable name: "Front-loading cost" or "Pacing to the critical phase." Applies to: creative work (don\'t exhaust your best ideas in the brief), relationships (don\'t spend all trust early), software development (don\'t ship all features in v1).'},
+        {type:'PATTERN RECOGNITION // TWO EXAMPLES',content:`<p><strong>Example A:</strong> The sonnet form — 14 lines, strict rhyme scheme, volta at line 9 — has produced more enduring poetry than free verse despite (or because of) its severe constraints. Poets report that the constraint forces unexpected combinations they would never have found in open form.</p><p><strong>Example B:</strong> Twitter's original 140-character limit, widely criticized as too restrictive, produced a distinctive writing style — compressed, punchy, metaphor-dense — that became a new form of public thought. When the limit doubled to 280, the average quality of writing on the platform measurably declined.</p>`,prompt:'Name the structural pattern. Be precise enough that the name transfers to a domain neither example touches.',correct:'constraint_forcing',hint:'Pattern: "Constraint as creative forcing function." The constraint doesn\'t limit output — it forces the maker past the obvious solution into combinations only pressure produces. Transferable name: "Productive constraint" or "Pressure-forced creativity." Applies to: budget limitations in design forcing elegant solutions, strict deadlines forcing editorial decisions, limited palette forcing compositional ingenuity.'},
+        {type:'PATTERN RECOGNITION // TWO EXAMPLES',content:`<p><strong>Example A:</strong> In judo, the most effective throws use the opponent\'s own momentum and weight against them — the defender\'s resistance becomes the force that completes the throw. Fighting the force directly produces poor results; redirecting it produces decisive ones.</p><p><strong>Example B:</strong> In persuasion, arguments that acknowledge and incorporate the strongest objection before making the case — "You\'re right that X is a real concern, and here\'s why that concern actually supports the conclusion" — are significantly more persuasive than arguments that ignore or dismiss objections.</p>`,prompt:'Find the shared structural mechanism and name it transferably.',correct:'redirecting_resistance',hint:'Pattern: "Resistance as resource." The opposing force — physical in judo, argumentative in persuasion — becomes the material that makes the move work. Fighting it costs; redirecting it produces leverage. Transferable name: "Resistance redirection" or "Using the opposing force." Applies to: product design (design for how users actually misuse the product, not how you intended), leadership (incorporate dissent into the plan rather than overriding it), writing (address the reader\'s skepticism before they raise it).'}
+      ],
+      advanced:[
+        {type:'PATTERN RECOGNITION // HARDER CASE',content:`<p><strong>Example A:</strong> Experienced surgeons performing routine procedures deliberately introduce micro-variations — slightly different hand positions, minor sequencing changes — to prevent the automaticity that makes routine surgery dangerous. Full automation of a skill removes the conscious monitoring that catches unexpected complications.</p><p><strong>Example B:</strong> Jazz musicians describe a state called "playing inside the changes" — following the chord structure so closely that the music becomes predictable — as creatively deadening. The most alive playing happens when they understand the structure well enough to deliberately violate it at exactly the right moment.</p>`,prompt:'These examples share a precise structural pattern. Name it at the mechanism level, not the surface level.',correct:'deliberate_disruption',hint:'Pattern: "Deliberate disruption of mastery." When a skill becomes fully automated, the conscious engagement that produces quality (and catches errors) disengages. Both surgery and jazz require practitioners to intentionally break their own fluency to stay present. Transferable name: "Mastery disruption" or "Deliberate de-automatization." Applies to: experienced writers introducing formal constraints to prevent formula, designers periodically working in unfamiliar mediums, teachers varying their most practiced lessons.'},
+        {type:'PATTERN RECOGNITION // HARDEST CASE',content:`<p><strong>Example A:</strong> In ecology, the removal of a keystone species — one that plays a disproportionate role in maintaining ecosystem structure — causes cascading failures across the entire system, even if the keystone species is small or inconspicuous. The system appears stable until the keystone is removed, then collapses faster than any single-species model predicts.</p><p><strong>Example B:</strong> In organizational design, the departure of a "connector" — someone who informally bridges departments, translates between technical and non-technical teams, and maintains relationships across silos — causes communication failures that appear as individual project problems but are actually systemic. The connector's contribution is invisible in the org chart but load-bearing in practice.</p>`,prompt:'Find the precise structural mechanism. The surface pattern is obvious — go deeper.',correct:'invisible_load_bearing',hint:'Surface: both involve removal revealing hidden importance. Structural mechanism: "Invisible load-bearing." In both cases, a component does disproportionate structural work that is invisible precisely because it\'s working — the system\'s stability conceals the load. When it\'s removed, the load it was carrying becomes visible in its absence. Transferable name: "The invisible keystone" or "Invisible load-bearing structure." Applies to: legacy code that seems unnecessary until removed, design elements that "disappear" when working correctly, social norms whose function is only visible when violated.'}
+      ],
+      edge:[
+        {type:'PATTERN RECOGNITION // EDGE CASE',content:`<p><strong>Example A:</strong> The Stroop effect — when the word "RED" is printed in blue ink, reading the color takes measurably longer than when word and ink color match. The automatic process (reading) interferes with the controlled process (naming the color). Two systems that normally cooperate create friction when pointed at conflicting tasks.</p><p><strong>Example B:</strong> In organizations undergoing change, the most resistance comes not from employees who oppose the change but from those who are highly competent in the current system. Their expertise — which makes them valuable — is precisely what makes adaptation costly for them. Competence in the old system is the interference pattern.</p>`,prompt:'Name the deepest structural pattern shared by these two examples. Then identify a third domain where this exact mechanism operates.',correct:'system_interference',hint:'Pattern: "Competence as interference." In both cases, an established, functional system (automatic reading, domain expertise) interferes with a new task that requires a different mode. The more developed the existing system, the higher the interference cost. This isn\'t about resistance — it\'s about structural incompatibility between two functional states. Transferable third domain: expert beginners in a new creative medium — experienced painters learning digital tools find their brush-hand knowledge actively interferes with the new input system.'}
+      ]
+    }
+  }
+};
+
+// ── STATE ──
+let currentSkill = '02';
+let currentRound = 0;
+let score = 0;
+let difficulty = 'standard';
+let sessionScenarios = [];
+let sessionHistory = [];
+const PROXY_URL = 'https://gravificer-proxy.mvphillips.workers.dev/';
+
+function selectSkill(id) {
+  currentSkill = id;
+  document.querySelectorAll('.skill-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.skill-tab[data-skill="${id}"]`).classList.add('active');
+  renderSkillIntro();
+  restartSession();
+}
+
+function renderSkillIntro() {
+  const s = skills[currentSkill];
+  const conceptsHtml = s.concepts.map(c => `
+    <div class="concept-card" style="border-color:${c.color}">
+      <div class="concept-label" style="color:${currentSkill==='02'?'#c4aaff':currentSkill==='03'?'var(--amber)':currentSkill==='04'?'var(--green)':'var(--magenta)'}">${c.label}</div>
+      <div class="concept-def">${c.text}</div>
+    </div>`).join('');
+
+  document.getElementById('skillIntroArea').innerHTML = `
+    <div class="skill-intro">
+      <div class="skill-meta">
+        <span class="skill-index">${s.index}</span>
+        <div class="skill-line"></div>
+        <span class="skill-tag" style="border-color:${s.tagColor};color:${s.tagTextColor}">${s.tag}</span>
+      </div>
+      <h2 class="skill-headline">${s.headline}</h2>
+      <div class="skill-body">${s.body}</div>
+      <div class="concept-row">${conceptsHtml}</div>
+    </div>`;
+}
+
+function getScenarios() {
+  const pool = skills[currentSkill].scenarios[difficulty] || skills[currentSkill].scenarios.standard;
+  return [...pool].sort(() => Math.random() - 0.5).slice(0, ROUNDS);
+}
+
+function buildProgressDots() {
+  let html = '';
+  for(let i = 0; i < ROUNDS; i++) {
+    html += `<div class="prog-dot${i < currentRound?' done':i===currentRound?' current':''}"></div>`;
+  }
+  html += `<div class="prog-label">${currentRound} / ${ROUNDS}</div>`;
+  return html;
+}
+
+function renderTraining() {
+  const s = skills[currentSkill];
+  const area = document.getElementById('trainingArea');
+  area.innerHTML = `
+    <div class="training-header">
+      <div class="training-title">Training Session</div>
+      <div class="training-line"></div>
+    </div>
+    <div class="session-meta">
+      <div class="session-stat">Skill <span>0${currentSkill}</span></div>
+      <div class="session-stat">Round <span id="roundNum">${currentRound+1}</span> of <span>${ROUNDS}</span></div>
+      <div class="session-stat">Score <span id="scoreDisplay">${score}</span></div>
+    </div>
+    <div class="difficulty-row" id="diffRow">
+      <button class="diff-btn${difficulty==='standard'?' active':''}" onclick="setDiff('standard')">Standard</button>
+      <button class="diff-btn${difficulty==='advanced'?' active':''}" onclick="setDiff('advanced')">Advanced</button>
+      <button class="diff-btn${difficulty==='edge'?' active':''}" onclick="setDiff('edge')">Edge Cases</button>
+    </div>
+    <div class="progress-dots" id="progressDots">${buildProgressDots()}</div>
+    <div class="loading-msg" id="loadingMsg">// BUILDING YOUR SESSION — PLEASE HOLD</div>
+    <div id="scenarioArea"></div>
+    <div class="session-complete" id="sessionComplete">
+      <div class="complete-mark">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><polyline points="4,11 9,16 18,6" stroke="#9b6dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="complete-title">Session complete</div>
+      <div class="complete-sub" id="completeSub">Generating your session insight...</div>
+      <div class="complete-actions">
+        <button class="btn-submit" onclick="restartSession()">Run another session →</button>
+        <a href="GF-TX-001-signal-trainer-skill-01.html" class="btn-next" style="text-decoration:none;display:inline-flex;align-items:center">← Skill 01</a>
+        <a href="https://tx.quirkyflashchronicles.com" class="btn-next" style="text-decoration:none;display:inline-flex;align-items:center">TX Library</a>
+      </div>
+    </div>`;
+  loadScenario();
+}
+
+function loadScenario() {
+  document.getElementById('progressDots').innerHTML = buildProgressDots();
+  document.getElementById('roundNum').textContent = currentRound + 1;
+  updateTopBar();
+  const sc = sessionScenarios[currentRound];
+  document.getElementById('scenarioArea').innerHTML = `
+    <div class="scenario-frame">
+      <div class="scenario-body">
+        <div class="scenario-type">${sc.type}</div>
+        <div class="scenario-content">${sc.content}</div>
+        <div class="scenario-prompt">${sc.prompt}</div>
+      </div>
+    </div>
+    <div class="response-section">
+      <div class="response-label">Your read</div>
+      <textarea class="response-input" id="responseInput" placeholder="Apply the question to this material — be specific about what you see..."></textarea>
+    </div>
+    <div class="submit-row">
+      <button class="btn-submit" id="submitBtn" onclick="submitResponse()">Submit read →</button>
+      <div class="thinking-indicator" id="thinkingIndicator">// CLAUDE IS READING YOUR SIGNAL</div>
+    </div>
+    <div class="diagnosis-frame" id="diagnosisFrame">
+      <div class="diagnosis-body" id="diagnosisBody"></div>
+    </div>
+    <div style="display:none" id="nextRow">
+      <button class="btn-next" onclick="nextScenario()">Next scenario →</button>
+    </div>`;
+}
+
+async function submitResponse() {
+  const userResponse = document.getElementById('responseInput').value.trim();
+  if(!userResponse) return;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('thinkingIndicator').style.display = 'block';
+  const sc = sessionScenarios[currentRound];
+  const s = skills[currentSkill];
+  const userMsg = `SCENARIO TYPE: ${sc.type}\n\nCONTENT: ${sc.content.replace(/<[^>]*>/g,'')}\n\nLEARNER'S READ: ${userResponse}\n\nCorrect answer context: ${sc.hint}`;
+  try {
+    const res = await fetch(PROXY_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:s.systemPrompt,messages:[{role:'user',content:userMsg}]})
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'No response received.';
+    const verdictMatch = text.match(/VERDICT:\s*\[?([A-Z /\-]+)\]?/i);
+    const verdict = verdictMatch ? verdictMatch[1].trim() : '';
+    const isCorrect = userResponse.toLowerCase().split(' ').some(w =>
+      sc.correct.toLowerCase().split('_').some(c => w.includes(c))
+    );
+    if(isCorrect) score++;
+    document.getElementById('scoreDisplay').textContent = score;
+    const diagBody = document.getElementById('diagnosisBody');
+    diagBody.innerHTML = `
+      <div class="diagnosis-verdict ${s.verdictClass}">
+        <div class="verdict-icon">◈</div>
+        <div>${text.split('\n')[0]}</div>
+      </div>
+      <div>${text.split('\n').slice(1).join('\n').replace(/\n\n/g,'</p><p>').replace(/\n/g,' ')
+        .replace(/^/,'<p>').replace(/$/,'</p>')}</div>`;
+    document.getElementById('diagnosisFrame').classList.add('show');
+    document.getElementById('nextRow').style.display = 'block';
+    document.getElementById('thinkingIndicator').style.display = 'none';
+    sessionHistory.push({sc, userResponse, isCorrect});
+    document.getElementById('diagnosisFrame').scrollIntoView({behavior:'smooth',block:'nearest'});
+  } catch(err) {
+    document.getElementById('thinkingIndicator').style.display = 'none';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('diagnosisFrame').classList.add('show');
+    document.getElementById('diagnosisBody').innerHTML = '<p style="color:var(--magenta);font-family:\'Share Tech Mono\',monospace;font-size:12px">// SIGNAL DISRUPTED — check connection and retry</p>';
+  }
+}
+
+function nextScenario() {
+  currentRound++;
+  if(currentRound >= ROUNDS) { showComplete(); return; }
+  document.getElementById('nextRow').style.display = 'none';
+  loadScenario();
+  document.getElementById('trainingArea').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function showComplete() {
+  updateTopBar(100);
+  document.getElementById('progressDots').innerHTML = buildProgressDots();
+  document.getElementById('scenarioArea').style.display = 'none';
+  document.getElementById('sessionComplete').classList.add('show');
+  const pct = Math.round((score/ROUNDS)*100);
+  const level = pct>=75?'Sharp signal':pct>=50?'Developing perception':'Early calibration';
+  const subEl = document.getElementById('completeSub');
+  subEl.textContent = `${level} — ${score} of ${ROUNDS} reads landed. Generating your session insight...`;
+  const histText = sessionHistory.map((h,i)=>`Scenario ${i+1}: Learner said "${h.userResponse.substring(0,80)}..." — Accurate: ${h.isCorrect}`).join('\n');
+  const skillNames = {'02':'Visual Logic Diagnosis','03':'Energy Mapping','04':'The Forge Test','05':'Pattern Naming'};
+  try {
+    const res = await fetch(PROXY_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        system:`You are the Gravificer Signal Trainer session analyst. Write a sharp session debrief (100-130 words) for a learner who completed a 4-scenario session on ${skillNames[currentSkill]}. Focus on: what their perception is doing well, where it\'s missing the signal, one specific thing to watch next session. Second person, Gravificer voice — direct, no fluff, no bullet lists. Don\'t start with "You".`,
+        messages:[{role:'user',content:`Score: ${score}/${ROUNDS} (${difficulty})\n\n${histText}`}]
+      })
+    });
+    const data = await res.json();
+    subEl.textContent = data.content?.[0]?.text || `${level} — ${score} of ${ROUNDS} reads connected.`;
+  } catch(e) {
+    subEl.textContent = `${level} — ${score} of ${ROUNDS} reads connected. Return to sharpen the signal.`;
+  }
+}
+
+function restartSession() {
+  currentRound = 0; score = 0; sessionHistory = [];
+  sessionScenarios = getScenarios();
+  renderTraining();
+}
+
+function setDiff(d) {
+  difficulty = d;
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  restartSession();
+}
+
+function updateTopBar(override) {
+  const pct = override !== undefined ? override : Math.round((currentRound/ROUNDS)*100);
+  document.getElementById('topFill').style.width = pct+'%';
+}
+
+window.addEventListener('scroll',()=>{
+  if(currentRound===0&&score===0){
+    const s=window.scrollY,t=document.documentElement.scrollHeight-window.innerHeight;
+    document.getElementById('topFill').style.width=Math.round((s/t)*30)+'%';
+  }
+});
+
+selectSkill('02');
+</script>
+</body>
+</html>
